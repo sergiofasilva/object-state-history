@@ -155,4 +155,3 @@ function mergeItems(previous, current) {
 }
 
 export default ObjectStateHistory;
-//export { ObjectHistory };

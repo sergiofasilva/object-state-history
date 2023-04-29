@@ -3,7 +3,7 @@ import ObjectStateHistory from '../index.js';
 import { describe, it, before } from 'node:test';
 import assert, { deepStrictEqual, strictEqual } from 'node:assert/strict';
 
-describe('ObjectHistory constructor', function () {
+describe('ObjectStateHistory constructor', function () {
   it('Should return an error when no object is passed to it.', () => {
     assert.throws(() => {
       new ObjectStateHistory([]);
@@ -57,7 +57,7 @@ describe('ObjectHistory constructor', function () {
   });
 });
 
-describe('ObjectHistory merge method', function () {
+describe('ObjectStateHistory merge method', function () {
   it('Should return an error when no parameter is passed to it.', () => {
     const originalObjectData = { a: '1', b: '2' };
     const objHist = new ObjectStateHistory(originalObjectData);
@@ -105,7 +105,7 @@ describe('ObjectHistory merge method', function () {
 
   // it('Should return an error when no parameter is passed to it.', () => {
   //   const objHistoryData = { a: '1', b: '2', c: { c1: '11', c2: '22' } };
-  //   let objHist = new ObjectHistory(objHistoryData);
+  //   let objHist = new ObjectStateHistory(objHistoryData);
   //   //console.log('GET:', objHist.last());
   //   console.log('GET1:', objHist);
   //   const updateObjHist = objHist.merge({ c: { k: '33' } });
@@ -130,7 +130,7 @@ describe('ObjectHistory merge method', function () {
   // });
 });
 
-describe('ObjectHistory delete operation', function () {
+describe('ObjectStateHistory delete operation', function () {
   it('Should not change the value when delete an inexistent proprety.', () => {
     const originalObjectData = { a: '1', b: '2' };
     const objHist = new ObjectStateHistory(originalObjectData);
@@ -146,7 +146,7 @@ describe('ObjectHistory delete operation', function () {
   });
 });
 
-describe('ObjectHistory list method', function () {
+describe('ObjectStateHistory list method', function () {
   it('Should have the keys "timestamp", "operation" and "data".', () => {
     const originalObjectData = { a: '1', b: '2' };
     const objHist = new ObjectStateHistory(originalObjectData);
@@ -212,7 +212,7 @@ describe('ObjectHistory list method', function () {
   });
 });
 
-describe('ObjectHistory listAll method', function () {
+describe('ObjectStateHistory listAll method', function () {
   it('Should have the keys "timestamp", "operation", "data" and "value".', () => {
     const originalObjectData = { a: '1', b: '2' };
     const objHist = new ObjectStateHistory(originalObjectData);
@@ -289,7 +289,7 @@ describe('ObjectHistory listAll method', function () {
   });
 });
 
-describe('ObjectHistory at method', function () {
+describe('ObjectStateHistory at method', function () {
   it('Should return undefined when called with invalid index.', () => {
     const originalObjectData = { a: '1', b: '2' };
     const objHist = new ObjectStateHistory(originalObjectData);
