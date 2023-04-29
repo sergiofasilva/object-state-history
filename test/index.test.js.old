@@ -1,0 +1,592 @@
+'use strict';
+import { ImmutableObjectHistory } from '../index.js';
+import { describe, it, before, mock } from 'node:test';
+import assert, { deepStrictEqual, strictEqual } from 'node:assert/strict';
+
+const { get, set, list, listAll, at } = ImmutableObjectHistory(new Map());
+
+// TODO: These tests depend on each other. They have to be rewritten.
+
+describe('ImmutableObjectHistory', function () {
+  let objectIsNotObject;
+  let objectWithNoTimestamp;
+  let objectWithInvalidTimestampString,
+    objectWithInvalidTimestampNegative,
+    objectWithInvalidTimestampFloat;
+  let objectWithNoData;
+  let key;
+  let userV1;
+  let userV2;
+  let userV3;
+  let userState1, userState2, userState3;
+  let getuserState1, getuserState2, getuserState3;
+  let list1, list2, list3;
+  let listAll1, listAll2, listAll3, listAllLast;
+  let atEmpty, at0, at1, at2, at3, at4, atMinus1, atMinus2, atNotInteger;
+
+  let userSetLast, userGetLast;
+
+  let userSetPreviousTimestamp,
+    userGetAfterPreviousTimestamp,
+    listAllAfterPreviousTimestamp;
+
+  before(async function () {
+    objectIsNotObject = 'notObject';
+    objectWithNoTimestamp = { data: { id: 1 } };
+    objectWithInvalidTimestampString = { timestamp: 'abc', data: { id: 1 } };
+    objectWithInvalidTimestampNegative = { timestamp: -1, data: { id: 1 } };
+    objectWithInvalidTimestampFloat = { timestamp: 1.4, data: { id: 1 } };
+    objectWithNoData = { timestamp: 1, value: { id: 1 } };
+
+    userV1 = { timestamp: 0, data: { id: 1, name: 'Name', age: 24 } };
+    userV2 = { timestamp: 1, data: { age: 25, genre: 'male' } };
+    userV3 = { timestamp: 2, data: { age: 26 } };
+    key = `user:${userV1.data.id}`;
+    userState1 = await set(key, userV1);
+    getuserState1 = await get(key);
+    list1 = await list(key);
+    listAll1 = await listAll(key);
+
+    userState2 = await set(key)(userV2);
+    getuserState2 = await get(key);
+    list2 = await list(key);
+    listAll2 = await listAll(key);
+
+    userState3 = await set(key, userV3);
+    getuserState3 = await get(key);
+    list3 = await list(key);
+    listAll3 = await listAll(key);
+
+    atEmpty = await at(key)();
+    at0 = await at(key)(0);
+    at1 = await at(key)(1);
+    at2 = await at(key, 2);
+    at3 = await at(key)(3);
+    at4 = await at(key)(4);
+    atMinus1 = await at(key)(-1);
+    atMinus2 = await at(key)(-2);
+    atNotInteger = await at(key)('NotInteger');
+
+    const lastUser = { timestamp: 9, data: { lastKey: 'lastValue' } };
+    userSetLast = await set(key, lastUser);
+    userGetLast = await get(key);
+    listAllLast = await listAll(key);
+
+    const userInsertLastWithPreviousTimestamp = {
+      timestamp: 8,
+      data: { lastKey: 'previousTimestamp' },
+    };
+    userSetPreviousTimestamp = await set(
+      key,
+      userInsertLastWithPreviousTimestamp
+    );
+    userGetAfterPreviousTimestamp = await get(key);
+    listAllAfterPreviousTimestamp = await listAll(key);
+  });
+
+  it('It should return an error when no parameter is passed to it.', () => {
+    assert.throws(() => {
+      const emptyImmutableObjectHistoryConstrunctor = ImmutableObjectHistory();
+    }, Error);
+  });
+
+  it('Method "list" should return an empty array if "get" method throws an error.', async (ctx) => {
+    const cache = new Map();
+    const { set, list } = ImmutableObjectHistory(cache);
+
+    ctx.mock.method(cache, 'get', () => {
+      throw new Error('Test error.');
+    });
+    const obj = { timestamp: 0, data: { id: 1, name: 'Name', age: 24 } };
+
+    const key = 'key';
+    await set(key, obj);
+
+    const emptyList = await list(key);
+    deepStrictEqual(emptyList, []);
+  });
+
+  it('Method "listAll" should return an empty array if "list" method throws an error.', async (ctx) => {
+    const cache = new Map();
+    const { set, listAll } = ImmutableObjectHistory(cache);
+
+    const obj = { timestamp: 0, data: { id: 1, name: 'Name', age: 24 } };
+
+    const key = 'key';
+    await set(key, obj);
+
+    cache.set(key, new Error('Test error.'));
+
+    const emptyListAll = await listAll(key);
+    deepStrictEqual(emptyListAll, []);
+  });
+
+  it('It should return an error when cache parameter not implement "get" method.', () => {
+    const cache = {
+      set: () => '',
+    };
+    assert.throws(() => {
+      const emptyImmutableObjectHistoryConstrunctor =
+        ImmutableObjectHistory(cache);
+    }, Error);
+  });
+
+  it('It should return an error when the "get" property of provided cache is not a function.', () => {
+    const cache = {
+      get: '',
+    };
+    assert.throws(() => {
+      const emptyImmutableObjectHistoryConstrunctor =
+        ImmutableObjectHistory(cache);
+    }, Error);
+  });
+
+  it('It should return an error when cache parameter not implement "set" method.', () => {
+    const cache = {
+      get: () => '',
+    };
+    assert.throws(() => {
+      const emptyImmutableObjectHistoryConstrunctor =
+        ImmutableObjectHistory(cache);
+    }, Error);
+  });
+
+  it('It should return an error when the "set" property of provided cache is not a function.', () => {
+    const cache = {
+      set: '',
+    };
+    assert.throws(() => {
+      const emptyImmutableObjectHistoryConstrunctor =
+        ImmutableObjectHistory(cache);
+    }, Error);
+  });
+
+  describe('set', function () {
+    describe('invalid object', function () {
+      it('should throw error', async () => {
+        await assert.rejects(
+          async () => {
+            await set('key', objectIsNotObject);
+          },
+          {
+            name: 'TypeError',
+            message: 'Value should be an object.',
+          }
+        );
+      });
+    });
+    describe('no timestamp property', function () {
+      it('should throw error', async () => {
+        await assert.rejects(
+          async () => {
+            await set('key', objectWithNoTimestamp);
+          },
+          {
+            name: 'Error',
+            message: 'Invalid object. Property "timestamp" is required.',
+          }
+        );
+      });
+    });
+    describe('invalid timestamp', function () {
+      it('should throw error', async () => {
+        await assert.rejects(
+          async () => {
+            await set('key', objectWithInvalidTimestampString);
+          },
+          {
+            name: 'Error',
+            message: 'Invalid object. Property "timestamp" not valid.',
+          }
+        );
+        await assert.rejects(
+          async () => {
+            await set('key', objectWithInvalidTimestampNegative);
+          },
+          {
+            name: 'Error',
+            message: 'Invalid object. Property "timestamp" not valid.',
+          }
+        );
+        await assert.rejects(
+          async () => {
+            await set('key', objectWithInvalidTimestampFloat);
+          },
+          {
+            name: 'Error',
+            message: 'Invalid object. Property "timestamp" not valid.',
+          }
+        );
+      });
+    });
+    describe('no object property', function () {
+      it('should throw error', async () => {
+        await assert.rejects(
+          async () => {
+            await set('key', objectWithNoData);
+          },
+          {
+            name: 'Error',
+            message: 'Invalid object. Property "data" is required.',
+          }
+        );
+      });
+    });
+
+    //////////////////////////////////////////////////////////
+    describe('set state 1', function () {
+      it("should return { id: 1, name: 'Name', age: 24 }", () => {
+        deepStrictEqual(userState1, { id: 1, name: 'Name', age: 24 });
+      });
+    });
+
+    describe('set state 1', function () {
+     it("should return { id: 1, name: 'Name', age: 24 }", async () => {
+        const { set } = ImmutableObjectHistory(new Map());
+        const userData = { id: 1, name: 'Name', age: 24 };
+        const userV1 = { timestamp: 0, data: userData };
+        const key = `user:${userV1.data.id}`;
+        const setUserState1 = await set(key, userV1);
+          deepStrictEqual(setUserState1, userData);
+        });
+    });
+    /////////////////////////////////////////////////////////
+
+    describe('set state 2', function () {
+      it("should return { id: 1, name: 'Name', age: 25, genre: 'male' }", () => {
+        deepStrictEqual(userState2, {
+          id: 1,
+          name: 'Name',
+          age: 25,
+          genre: 'male',
+        });
+      });
+    });
+    describe('set state 3', function () {
+      it("should return { id: 1, name: 'Name', age: 26, genre: 'male' }", () => {
+        deepStrictEqual(userState3, {
+          id: 1,
+          name: 'Name',
+          age: 26,
+          genre: 'male',
+        });
+      });
+    });
+  });
+
+  describe('get', function () {
+    describe('get state 1', function () {
+      it("should return { id: 1, name: 'Name', age: 24 }", () => {
+        deepStrictEqual(getuserState1, {
+          id: 1,
+          name: 'Name',
+          age: 24,
+        });
+      });
+    });
+    describe('get state 3', function () {
+      it("should return { id: 1, name: 'Name', age: 25, genre: 'male' }", () => {
+        deepStrictEqual(getuserState2, {
+          id: 1,
+          name: 'Name',
+          age: 25,
+          genre: 'male',
+        });
+      });
+    });
+    describe('get state 3', function () {
+      it("should return { id: 1, name: 'Name', age: 26, genre: 'male' }", () => {
+        deepStrictEqual(getuserState3, {
+          id: 1,
+          name: 'Name',
+          age: 26,
+          genre: 'male',
+        });
+      });
+    });
+  });
+
+  describe('list', function () {
+    describe('list length', function () {
+      it('list1 should have length 1', () => {
+        deepStrictEqual(list1.length, 1);
+      });
+      it('list2 should have length 2', () => {
+        deepStrictEqual(list2.length, 2);
+      });
+      it('list3 should have length 3', () => {
+        deepStrictEqual(list3.length, 3);
+      });
+      it("list3 last item should be equal to { id: 1, name: 'Name', age: 26, genre: 'male' }", () => {
+        deepStrictEqual(list3[list3.length - 1].data, {
+          age: 26,
+        });
+      });
+      it('"at" funtion with -1 argument is equal with "at" function without arguments', () => {
+        deepStrictEqual(atMinus1, atEmpty);
+      });
+    });
+  });
+
+  describe('listAll', function () {
+    describe('list length', function () {
+      it('listAll1 should have length 1', () => {
+        deepStrictEqual(listAll1.length, 1);
+      });
+      it('listAll2 should have length 2', () => {
+        deepStrictEqual(listAll2.length, 2);
+      });
+      it('listAll3 should have length 3', () => {
+        deepStrictEqual(listAll3.length, 3);
+      });
+    });
+    describe('listAll item', function () {
+      it("Last listAll1 item should return { id: 1, name: 'Name', age: 24 }", () => {
+        deepStrictEqual(listAll1[listAll1.length - 1].item, {
+          id: 1,
+          name: 'Name',
+          age: 24,
+        });
+      });
+      it("Last listAll3 item should return { id: 1, name: 'Name', age: 25, genre: 'male' }", () => {
+        deepStrictEqual(listAll2[listAll2.length - 1].item, {
+          id: 1,
+          name: 'Name',
+          age: 25,
+          genre: 'male',
+        });
+      });
+      it("Last listAll3 item should return { id: 1, name: 'Name', age: 26, genre: 'male' }", () => {
+        deepStrictEqual(listAll3[listAll3.length - 1].item, {
+          id: 1,
+          name: 'Name',
+          age: 26,
+          genre: 'male',
+        });
+      });
+      it('First listAll3 element "data" property should return {id: 1, age: 24, name: "Name" }', () => {
+        deepStrictEqual(listAll3[0].data, {
+          id: 1,
+          age: 24,
+          name: 'Name',
+        });
+      });
+      it('Second listAll3 element "data" property should return { age: 26, gender: "male" }', () => {
+        deepStrictEqual(listAll3[1].data, {
+          age: 25,
+          genre: 'male',
+        });
+      });
+      it('Third listAll3 element "data" property should return { age: 26 }', () => {
+        deepStrictEqual(listAll3[2].data, {
+          age: 26,
+        });
+      });
+      it("listAll element should return an object with keys 'timestamp', 'item', 'data'", () => {
+        strictEqual(
+          ['timestamp', 'item', , 'data'].every((key) =>
+            Object.keys(listAll3[listAll3.length - 1]).includes(key)
+          ),
+          true
+        );
+      });
+      it('listAll element should return an object with 3 keys', () => {
+        strictEqual(Object.keys(listAll3[listAll3.length - 1]).length, 3);
+      });
+      it('listAll, all element should be sorted by timestamp', () => {
+        assert(listAllLast[0].timestamp <= listAllLast[1].timestamp);
+        assert(listAllLast[1].timestamp <= listAllLast[2].timestamp);
+        assert(listAllLast[2].timestamp <= listAllLast[3].timestamp);
+      });
+    });
+  });
+
+  describe('at', function () {
+    describe('at empty', function () {
+      it("item should return { id: 1, name: 'Name', age: 26, genre: 'male' }", () => {
+        deepStrictEqual(atEmpty.item, {
+          id: 1,
+          name: 'Name',
+          age: 26,
+          genre: 'male',
+        });
+      });
+    });
+    describe('at 0', function () {
+      it("item should return { id: 1, name: 'Name', age: 24 }", () => {
+        deepStrictEqual(at0.item, {
+          id: 1,
+          name: 'Name',
+          age: 24,
+        });
+      });
+    });
+    describe('at 1', function () {
+      it("item should return { id: 1, name: 'Name', age: 25, genre: 'male' }", () => {
+        deepStrictEqual(at1.item, {
+          id: 1,
+          name: 'Name',
+          age: 25,
+          genre: 'male',
+        });
+      });
+    });
+    describe('at 2', function () {
+      it("item should return { id: 1, name: 'Name', age: 26, genre: 'male' }", () => {
+        deepStrictEqual(at2.item, {
+          id: 1,
+          name: 'Name',
+          age: 26,
+          genre: 'male',
+        });
+      });
+    });
+    describe('at 3', function () {
+      it('should return undefined', () => {
+        deepStrictEqual(at3, undefined);
+      });
+    });
+    describe('at 4', function () {
+      it('should return undefined', () => {
+        deepStrictEqual(at4, undefined);
+      });
+    });
+    describe('at -2', function () {
+      it("item should return { id: 1, name: 'Name', age: 25, genre: 'male' }", () => {
+        deepStrictEqual(atMinus2.item, {
+          id: 1,
+          name: 'Name',
+          age: 25,
+          genre: 'male',
+        });
+      });
+    });
+    describe('at not an integer', function () {
+      it('should return undefined', () => {
+        deepStrictEqual(atNotInteger, undefined);
+      });
+    });
+    describe('at -1', function () {
+      it("item should return { id: 1, name: 'Name', age: 26, genre: 'male' }", () => {
+        deepStrictEqual(atMinus1.item, {
+          id: 1,
+          name: 'Name',
+          age: 26,
+          genre: 'male',
+        });
+      });
+      it("should return an object with keys 'timestamp', 'item'", () => {
+        strictEqual(
+          ['timestamp', 'item'].every((key) =>
+            Object.keys(atMinus1).includes(key)
+          ),
+          true
+        );
+      });
+      it('should return an object with 3 keys', () => {
+        strictEqual(Object.keys(atMinus1).length, 3);
+      });
+    });
+  });
+
+  describe('Last set equal last get', function () {
+    it('should be deep equal', () => {
+      deepStrictEqual(userSetLast, userGetLast);
+    });
+  });
+
+  describe('Immutability', function () {
+    it('list is immutable and push should return an error', () => {
+      assert.throws(() => {
+        list3.push({ newKey: 'newValue' });
+      }, Error);
+    });
+    it('listAll is immutable and push should return an error', () => {
+      assert.throws(() => {
+        listAll3.push({ newKey: 'newValue' });
+      }, Error);
+    });
+    it('set return object is immutable', () => {
+      assert.throws(() => {
+        userState3['newKey'] = 'newValue';
+      }, Error);
+    });
+    it('get return object is immutable', () => {
+      assert.throws(() => {
+        getuserState3.newKey = 'newValue';
+      }, Error);
+    });
+    it('at return object is immutable', () => {
+      assert.throws(() => {
+        atMinus1['newKey'] = 'newValue';
+      }, Error);
+    });
+  });
+
+  describe('User inserted with previous timestamp', function () {
+    let currentLastUserAt, currentLastUserGet;
+    before(async function () {
+      currentLastUserAt = await at(key, -1);
+      currentLastUserGet = await get(key);
+    });
+    describe('Last user is the one wth biggest timestamp', function () {
+      it('should be deep equal', () => {
+        deepStrictEqual(userGetAfterPreviousTimestamp, userGetLast);
+        deepStrictEqual(currentLastUserAt.item, currentLastUserGet);
+        deepStrictEqual(currentLastUserAt.item, userGetLast);
+        deepStrictEqual(currentLastUserAt.item, userGetAfterPreviousTimestamp);
+      });
+    });
+    describe('Last user timestamp = 9', function () {
+      it('should return true', async () => {
+        strictEqual(currentLastUserAt.timestamp, 9);
+      });
+    });
+
+    describe('User timestamp = 9 is the last', function () {
+      it('should return true', async () => {
+        strictEqual(currentLastUserAt.timestamp, 9);
+      });
+      it("should return { id: 1, name: 'Name', age: 26, genre: 'male', lastKey: 'lastValue' }", () => {
+        deepStrictEqual(currentLastUserAt.item, {
+          id: 1,
+          name: 'Name',
+          age: 26,
+          genre: 'male',
+          lastKey: 'lastValue',
+        });
+        deepStrictEqual(currentLastUserGet, {
+          id: 1,
+          name: 'Name',
+          age: 26,
+          genre: 'male',
+          lastKey: 'lastValue',
+        });
+      });
+    });
+
+    describe('User timestamp = 8 is the penultimate.', function () {
+      let penultimateLastUser;
+      before(async function () {
+        penultimateLastUser = await at(key, -2);
+      });
+      it('should return true', async () => {
+        strictEqual(penultimateLastUser.timestamp, 8);
+        deepStrictEqual(userSetPreviousTimestamp, penultimateLastUser.item);
+      });
+      it('should return true', async () => {
+        const penultimateLastUser = await at(key, -2);
+        strictEqual(penultimateLastUser.timestamp, 8);
+      });
+      it("should return { id: 1, name: 'Name', age: 26, genre: 'male', lastKey: 'lastValue' }", () => {
+        deepStrictEqual(penultimateLastUser.item, {
+          id: 1,
+          name: 'Name',
+          age: 26,
+          genre: 'male',
+          lastKey: 'previousTimestamp',
+        });
+      });
+    });
+  });
+});

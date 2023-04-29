@@ -1,0 +1,36 @@
+{
+  "name": "object-state-history",
+  "version": "2.0.1",
+  "description": "The ObjectStateHistory class is a JavaScript implementation that allows you to keep track of changes in an object over time, creating a history of the modifications.",
+  "main": "./dist/esm/index.js",
+  "types": "./dist/types/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "build": "tsc --project tsconfig.esm.json & tsc --project tsconfig.cjs.json && mv ./dist/cjs/index.js ./dist/cjs/index.cjs"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sergiofasilva/object-state-history.git"
+  },
+  "keywords": [
+    "immutable",
+    "state",
+    "history",
+    "audit",
+    "logging",
+    "data",
+    "trace",
+    "time",
+    "list"
+  ],
+  "author": "Sérgio Silva <sergiofasilva@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sergiofasilva/object-state-history/issues"
+  },
+  "homepage": "https://github.com/sergiofasilva/object-state-history#readme"
+}
