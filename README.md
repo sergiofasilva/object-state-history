@@ -1,50 +1,50 @@
-# ObjectHistory
+# ObjectStateHistory
 
-The ObjectHistory is a JavaScript implementation that allows you to keep track of changes in an object over time, creating a history of the modifications.
+The ObjectStateHistory is a JavaScript implementation that allows you to keep track of changes in an object over time, creating a history of the modifications.
 
 &nbsp;
 
 ## Installation
 
-To use **ObjectHistory**, simply install it via **npm**:
+To use **ObjectStateHistory**, simply install it via **npm**:
 
 ```bash
-npm i object-history
+npm i object-state-history
 ```
 
 &nbsp;
 ... _or via **yarn**_:
 
 ```bash
-yarn add object-history
+yarn add object-state-history
 ```
 
 &nbsp;
 
 ## Usage
 
-The ObjectHistory can be used by importing it into your module using the import statement, like so:
+The ObjectStateHistory can be used by importing it into your module using the import statement, like so:
 
 ```javascript
-import ObjectHistory from 'object-history';
+import ObjectStateHistory from 'object-state-history';
 ```
 
 &nbsp;
 ... _or with **require** (CommonJS)_:
 
 ```javascript
-const ObjectHistory = require('object-history');
+const ObjectStateHistory = require('object-state-history');
 ```
 
 &nbsp;
 
-Once imported, create a new instance of ObjectHistory by passing an object to the constructor like:
+Once imported, create a new instance of ObjectStateHistory by passing an object to the constructor like:
 
 ```javascript
-const objHistory = new ObjectHistory({ prop1: 'value1', prop2: 'value2' });
+const objHistory = new ObjectStateHistory({ prop1: 'value1', prop2: 'value2' });
 ```
 
-Once created, you can make changes to the object directly as usual, but they will be tracked automatically by ObjectHistory:
+Once created, you can make changes to the object directly as usual, but they will be tracked automatically by ObjectStateHistory:
 
 ```javascript
 objHistory.prop3 = 'value3';
@@ -77,7 +77,7 @@ console.log(objHistory.at(0));
 
 # API
 
-The ObjectHistory provides the following methods:
+The ObjectStateHistory provides the following methods:
 
 ## constructor(object)
 
@@ -137,6 +137,6 @@ The value getter returns a snapshot of the current state of the object.
 
 ## License
 
-The ObjectHistory class is open source software licensed under the MIT License.
+The ObjectStateHistory class is open source software licensed under the MIT License.
 
 [MIT](https://choosealicense.com/licenses/mit/)

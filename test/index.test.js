@@ -1,32 +1,32 @@
 'use strict';
-import ObjectHistory from '../index.js';
+import ObjectStateHistory from '../index.js';
 import { describe, it, before } from 'node:test';
 import assert, { deepStrictEqual, strictEqual } from 'node:assert/strict';
 
 describe('ObjectHistory constructor', function () {
   it('Should return an error when no object is passed to it.', () => {
     assert.throws(() => {
-      new ObjectHistory([]);
+      new ObjectStateHistory([]);
     }, Error);
     assert.throws(() => {
-      new ObjectHistory('string');
+      new ObjectStateHistory('string');
     }, Error);
     assert.throws(() => {
-      new ObjectHistory(123);
+      new ObjectStateHistory(123);
     }, Error);
     assert.throws(() => {
-      new ObjectHistory(new Set());
+      new ObjectStateHistory(new Set());
     }, Error);
   });
 
   it('Should return an empty object when no parameter is passed to it.', () => {
-    const emptyObjHist = new ObjectHistory();
+    const emptyObjHist = new ObjectStateHistory();
     deepStrictEqual(emptyObjHist.value, {});
   });
 
   it('Should return the object provided.', () => {
     const objHistoryData = { a: '1', b: '2' };
-    const objHist = new ObjectHistory(objHistoryData);
+    const objHist = new ObjectStateHistory(objHistoryData);
 
     deepStrictEqual(objHist.value, objHistoryData);
     deepStrictEqual(objHist.value, objHist.valueOf());
@@ -34,7 +34,7 @@ describe('ObjectHistory constructor', function () {
 
   it('Should return the value as JSON stringify when call toString method.', () => {
     const objHistoryData = { a: '1', b: '2' };
-    const objHist = new ObjectHistory(objHistoryData);
+    const objHist = new ObjectStateHistory(objHistoryData);
 
     deepStrictEqual(objHist.value, objHistoryData);
     deepStrictEqual(objHist.toString(), JSON.stringify(objHist.value));
@@ -43,14 +43,14 @@ describe('ObjectHistory constructor', function () {
   it('Should not change the original object.', () => {
     const objData = { a: '1', b: '2' };
     const objDataCopy = { ...objData };
-    new ObjectHistory(objData);
+    new ObjectStateHistory(objData);
     deepStrictEqual(objData, objDataCopy);
   });
 
   it('Should not change the value when change the original object.', () => {
     const objData = { a: '1', b: '2' };
     const objDataCopy = { ...objData };
-    const objHist = new ObjectHistory(objData);
+    const objHist = new ObjectStateHistory(objData);
     objData.b = '3';
     assert.notEqual(objData, objDataCopy);
     deepStrictEqual(objHist.value, objDataCopy);
@@ -60,7 +60,7 @@ describe('ObjectHistory constructor', function () {
 describe('ObjectHistory merge method', function () {
   it('Should return an error when no parameter is passed to it.', () => {
     const originalObjectData = { a: '1', b: '2' };
-    const objHist = new ObjectHistory(originalObjectData);
+    const objHist = new ObjectStateHistory(originalObjectData);
 
     assert.throws(() => {
       objHist.merge();
@@ -69,7 +69,7 @@ describe('ObjectHistory merge method', function () {
 
   it('Should not change the value when an empty object is passed.', () => {
     const originalObjectData = { a: '1', b: '2', c: { c1: '11', c2: '22' } };
-    const objHist = new ObjectHistory(originalObjectData);
+    const objHist = new ObjectStateHistory(originalObjectData);
     const mergeEmptyObjHist = objHist.merge({});
 
     deepStrictEqual(mergeEmptyObjHist, originalObjectData);
@@ -81,7 +81,7 @@ describe('ObjectHistory merge method', function () {
     const mergeObjectData = { c: '3' };
     const lastObjectData = { a: '1', b: '2', c: '3' };
 
-    const objHist = new ObjectHistory(originalObjectData);
+    const objHist = new ObjectStateHistory(originalObjectData);
     const mergeObjHist = objHist.merge(mergeObjectData);
     deepStrictEqual(mergeObjHist, lastObjectData);
     deepStrictEqual(objHist.value, lastObjectData);
@@ -90,7 +90,7 @@ describe('ObjectHistory merge method', function () {
   it('Should merge the property changed.', () => {
     const originalObjectData = { a: '1', b: '2' };
 
-    const objHist = new ObjectHistory(originalObjectData);
+    const objHist = new ObjectStateHistory(originalObjectData);
     objHist.a = '11';
     deepStrictEqual(objHist.value, { a: '11', b: '2' });
   });
@@ -98,7 +98,7 @@ describe('ObjectHistory merge method', function () {
   it('Should add the property changed.', () => {
     const originalObjectData = { a: '1', b: '2' };
 
-    const objHist = new ObjectHistory(originalObjectData);
+    const objHist = new ObjectStateHistory(originalObjectData);
     objHist.c = '3';
     deepStrictEqual(objHist.value, { a: '1', b: '2', c: '3' });
   });
@@ -133,14 +133,14 @@ describe('ObjectHistory merge method', function () {
 describe('ObjectHistory delete operation', function () {
   it('Should not change the value when delete an inexistent proprety.', () => {
     const originalObjectData = { a: '1', b: '2' };
-    const objHist = new ObjectHistory(originalObjectData);
+    const objHist = new ObjectStateHistory(originalObjectData);
     delete objHist.c;
     deepStrictEqual(objHist.value, originalObjectData);
   });
 
   it('Should delete the property if exists.', () => {
     const originalObjectData = { a: '1', b: '2' };
-    const objHist = new ObjectHistory(originalObjectData);
+    const objHist = new ObjectStateHistory(originalObjectData);
     delete objHist.b;
     deepStrictEqual(objHist.value, { a: '1' });
   });
@@ -149,7 +149,7 @@ describe('ObjectHistory delete operation', function () {
 describe('ObjectHistory list method', function () {
   it('Should have the keys "timestamp", "operation" and "data".', () => {
     const originalObjectData = { a: '1', b: '2' };
-    const objHist = new ObjectHistory(originalObjectData);
+    const objHist = new ObjectStateHistory(originalObjectData);
     const list = objHist.list();
 
     console.log('Object.keys(list[0]): ', Object.keys(list[0]));
@@ -162,14 +162,14 @@ describe('ObjectHistory list method', function () {
 
   it('Should have a lenght of 1 after call the constructor.', () => {
     const originalObjectData = { a: '1', b: '2' };
-    const objHist = new ObjectHistory(originalObjectData);
+    const objHist = new ObjectStateHistory(originalObjectData);
     const list = objHist.list();
     strictEqual(list.length, 1);
   });
 
   it('Should increment the lenght after call the merge method.', () => {
     const originalObjectData = { a: '1', b: '2', c: { c1: '11', c2: '22' } };
-    const objHist = new ObjectHistory(originalObjectData);
+    const objHist = new ObjectStateHistory(originalObjectData);
     objHist.merge({});
     const list = objHist.list();
     strictEqual(list.length, 2);
@@ -178,7 +178,7 @@ describe('ObjectHistory list method', function () {
   it('Should increment the lenght after change an existent property.', () => {
     const originalObjectData = { a: '1', b: '2' };
 
-    const objHist = new ObjectHistory(originalObjectData);
+    const objHist = new ObjectStateHistory(originalObjectData);
     objHist.a = '11';
     const list = objHist.list();
     strictEqual(list.length, 2);
@@ -187,7 +187,7 @@ describe('ObjectHistory list method', function () {
   it('Should increment the lenght after change an inexistent property.', () => {
     const originalObjectData = { a: '1', b: '2' };
 
-    const objHist = new ObjectHistory(originalObjectData);
+    const objHist = new ObjectStateHistory(originalObjectData);
     objHist.z = '11';
     const list = objHist.list();
     strictEqual(list.length, 2);
@@ -196,7 +196,7 @@ describe('ObjectHistory list method', function () {
   it('Should increment the lenght after delete an existent property.', () => {
     const originalObjectData = { a: '1', b: '2' };
 
-    const objHist = new ObjectHistory(originalObjectData);
+    const objHist = new ObjectStateHistory(originalObjectData);
     delete objHist.b;
     const list = objHist.list();
     strictEqual(list.length, 2);
@@ -205,7 +205,7 @@ describe('ObjectHistory list method', function () {
   it('Should keep the lenght after delete an inexistent property.', () => {
     const originalObjectData = { a: '1', b: '2' };
 
-    const objHist = new ObjectHistory(originalObjectData);
+    const objHist = new ObjectStateHistory(originalObjectData);
     delete objHist.z;
     const list = objHist.list();
     strictEqual(list.length, 1);
@@ -215,7 +215,7 @@ describe('ObjectHistory list method', function () {
 describe('ObjectHistory listAll method', function () {
   it('Should have the keys "timestamp", "operation", "data" and "value".', () => {
     const originalObjectData = { a: '1', b: '2' };
-    const objHist = new ObjectHistory(originalObjectData);
+    const objHist = new ObjectStateHistory(originalObjectData);
     const listAll = objHist.listAll();
 
     assert.ok(
@@ -227,14 +227,14 @@ describe('ObjectHistory listAll method', function () {
 
   it('Should have a lenght of 1 after call the constructor.', () => {
     const originalObjectData = { a: '1', b: '2' };
-    const objHist = new ObjectHistory(originalObjectData);
+    const objHist = new ObjectStateHistory(originalObjectData);
     const listAll = objHist.listAll();
     strictEqual(listAll.length, 1);
   });
 
   it('Should increment the lenght after call the merge method.', () => {
     const originalObjectData = { a: '1', b: '2', c: { c1: '11', c2: '22' } };
-    const objHist = new ObjectHistory(originalObjectData);
+    const objHist = new ObjectStateHistory(originalObjectData);
     objHist.merge({});
     const listAll = objHist.listAll();
     strictEqual(listAll.length, 2);
@@ -243,7 +243,7 @@ describe('ObjectHistory listAll method', function () {
   it('Should increment the lenght after change an existent property.', () => {
     const originalObjectData = { a: '1', b: '2' };
 
-    const objHist = new ObjectHistory(originalObjectData);
+    const objHist = new ObjectStateHistory(originalObjectData);
     objHist.a = '11';
     const listAll = objHist.listAll();
     strictEqual(listAll.length, 2);
@@ -252,7 +252,7 @@ describe('ObjectHistory listAll method', function () {
   it('Should increment the lenght after change an inexistent property.', () => {
     const originalObjectData = { a: '1', b: '2' };
 
-    const objHist = new ObjectHistory(originalObjectData);
+    const objHist = new ObjectStateHistory(originalObjectData);
     objHist.z = '11';
     const listAll = objHist.listAll();
     strictEqual(listAll.length, 2);
@@ -261,7 +261,7 @@ describe('ObjectHistory listAll method', function () {
   it('Should increment the lenght after delete an existent property.', () => {
     const originalObjectData = { a: '1', b: '2' };
 
-    const objHist = new ObjectHistory(originalObjectData);
+    const objHist = new ObjectStateHistory(originalObjectData);
     delete objHist.b;
     const listAll = objHist.listAll();
     strictEqual(listAll.length, 2);
@@ -270,7 +270,7 @@ describe('ObjectHistory listAll method', function () {
   it('Should keep the lenght after delete an inexistent property.', () => {
     const originalObjectData = { a: '1', b: '2' };
 
-    const objHist = new ObjectHistory(originalObjectData);
+    const objHist = new ObjectStateHistory(originalObjectData);
     delete objHist.z;
     const listAll = objHist.listAll();
     strictEqual(listAll.length, 1);
@@ -278,7 +278,7 @@ describe('ObjectHistory listAll method', function () {
 
   it('Should return an empty array if "list" method throws an error.', async (ctx) => {
     const originalObjectData = { a: '1', b: '2' };
-    const objHist = new ObjectHistory(originalObjectData);
+    const objHist = new ObjectStateHistory(originalObjectData);
 
     ctx.mock.method(objHist, 'list', () => {
       throw new Error('Test error.');
@@ -292,7 +292,7 @@ describe('ObjectHistory listAll method', function () {
 describe('ObjectHistory at method', function () {
   it('Should return undefined when called with invalid index.', () => {
     const originalObjectData = { a: '1', b: '2' };
-    const objHist = new ObjectHistory(originalObjectData);
+    const objHist = new ObjectStateHistory(originalObjectData);
     objHist.c = '3';
     const value1 = objHist.at(7);
     strictEqual(value1, undefined);
@@ -303,7 +303,7 @@ describe('ObjectHistory at method', function () {
 
   it('Should return the object value when called without arguments.', () => {
     const originalObjectData = { a: '1', b: '2' };
-    const objHist = new ObjectHistory(originalObjectData);
+    const objHist = new ObjectStateHistory(originalObjectData);
     objHist.c = '3';
     const value = objHist.at();
     deepStrictEqual(value, objHist.value);
@@ -312,7 +312,7 @@ describe('ObjectHistory at method', function () {
 
   it('Should return the object value when called with -1.', () => {
     const originalObjectData = { a: '1', b: '2' };
-    const objHist = new ObjectHistory(originalObjectData);
+    const objHist = new ObjectStateHistory(originalObjectData);
     objHist.c = '3';
     const valueMinusOne = objHist.at(-1);
     deepStrictEqual(valueMinusOne, objHist.value);
@@ -321,7 +321,7 @@ describe('ObjectHistory at method', function () {
 
   it('Should return the object value corresponding to argument index.', () => {
     const originalObjectData = { a: '1', b: '2' };
-    const objHist = new ObjectHistory(originalObjectData);
+    const objHist = new ObjectStateHistory(originalObjectData);
     objHist.c = '3';
     objHist.d = '4';
 
@@ -344,7 +344,7 @@ describe('ObjectHistory at method', function () {
 
   it('testes', () => {
     const originalObjectData = { a: '1', b: '2' };
-    const objHist = new ObjectHistory(originalObjectData);
+    const objHist = new ObjectStateHistory(originalObjectData);
     objHist.merge({});
     console.log('LAST:', objHist);
   });

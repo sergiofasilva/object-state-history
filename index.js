@@ -1,6 +1,6 @@
 'use strict';
 
-class ObjectHistory {
+class ObjectStateHistory {
   #history = [];
   constructor(object) {
     if (object === undefined) {
@@ -11,7 +11,7 @@ class ObjectHistory {
     }
     const obj = structuredClone(object);
 
-    this.#history.push(ObjectHistory.#buildItem(obj));
+    this.#history.push(ObjectStateHistory.#buildItem(obj));
     this.#buildObjectRepresentation();
 
     return new Proxy(this, {
@@ -51,7 +51,7 @@ class ObjectHistory {
 
   get value() {
     const lastItem = this.#mergeListOfObjects();
-    return ObjectHistory.#getFreezedClonedObject(lastItem);
+    return ObjectStateHistory.#getFreezedClonedObject(lastItem);
   }
 
   merge(data) {
@@ -65,7 +65,7 @@ class ObjectHistory {
     ) {
       throw new Error('Should be provided an argument of type object.');
     }
-    const item = ObjectHistory.#buildItem(data, operation);
+    const item = ObjectStateHistory.#buildItem(data, operation);
     this.#history.push(item);
     this.#buildObjectRepresentation(item);
 
@@ -73,7 +73,7 @@ class ObjectHistory {
   }
 
   list() {
-    return ObjectHistory.#getFreezedClonedObject(this.#history);
+    return ObjectStateHistory.#getFreezedClonedObject(this.#history);
   }
 
   listAll() {
@@ -91,7 +91,7 @@ class ObjectHistory {
       history = [];
     }
 
-    return ObjectHistory.#getFreezedClonedObject(history);
+    return ObjectStateHistory.#getFreezedClonedObject(history);
   }
 
   at(index = -1) {
@@ -107,7 +107,7 @@ class ObjectHistory {
 
     const historyToIndex = this.#history.slice(0, index + 1);
     const item = this.#mergeListOfObjects(historyToIndex);
-    return ObjectHistory.#getFreezedClonedObject(item);
+    return ObjectStateHistory.#getFreezedClonedObject(item);
   }
 
   #mergeListOfObjects(list) {
@@ -154,5 +154,5 @@ function mergeItems(previous, current) {
   return { ...previous, ...current.data };
 }
 
-export default ObjectHistory;
+export default ObjectStateHistory;
 //export { ObjectHistory };
