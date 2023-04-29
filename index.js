@@ -1,5 +1,11 @@
 'use strict';
 
+const OPERATIONS = Object.freeze({
+  delete: 'delete',
+  replace: 'replace',
+  merge: 'merge',
+});
+
 class ObjectStateHistory {
   #history = [];
   constructor(object) {
@@ -34,7 +40,7 @@ class ObjectStateHistory {
       deleteProperty(target, prop) {
         const newObj = structuredClone(target.value);
         if (prop in newObj) {
-          target.#merge(prop, 'delete');
+          target.#merge(prop, OPERATIONS.delete);
         }
         return true;
       },
@@ -58,13 +64,24 @@ class ObjectStateHistory {
     return this.#merge(data);
   }
 
-  #merge(data, operation = 'merge') {
-    if (
-      data === undefined ||
-      (operation === 'merge' && data.constructor !== Object)
-    ) {
+  replace(data) {
+    return this.#merge(data, OPERATIONS.replace);
+  }
+
+  #merge(data, operation = OPERATIONS.merge) {
+    const isMergeOrReplaceOperation = [
+      OPERATIONS.merge,
+      OPERATIONS.replace,
+    ].includes(operation);
+
+    const isValidData =
+      data !== undefined &&
+      (!isMergeOrReplaceOperation || data.constructor === Object);
+
+    if (!isValidData) {
       throw new Error('Should be provided an argument of type object.');
     }
+
     const item = ObjectStateHistory.#buildItem(data, operation);
     this.#history.push(item);
     this.#buildObjectRepresentation(item);
@@ -119,13 +136,18 @@ class ObjectStateHistory {
   }
 
   #buildObjectRepresentation(lastItem) {
-    if (lastItem && lastItem.operation === 'delete') {
+    if (lastItem && lastItem.operation === OPERATIONS.delete) {
       delete this[lastItem.data];
+    }
+    if (lastItem && lastItem.operation === OPERATIONS.replace) {
+      for (const key of Object.keys(this)) {
+        delete this[key];
+      }
     }
     Object.keys(this.value).forEach((key) => (this[key] = this.value[key]));
   }
 
-  static #buildItem(item, operation = 'merge') {
+  static #buildItem(item, operation = OPERATIONS.merge) {
     return {
       timestamp: Date.now(),
       operation: operation,
@@ -141,15 +163,19 @@ class ObjectStateHistory {
 function mergeItems(previous, current) {
   if (
     !current ||
-    (current.operation === 'merge' && current?.data?.constructor !== Object)
+    (current.operation === OPERATIONS.merge &&
+      current?.data?.constructor !== Object)
   ) {
     return { ...previous };
   }
 
-  if (current.operation === 'delete') {
+  if (current.operation === OPERATIONS.delete) {
     const newPrevious = structuredClone(previous);
     delete newPrevious[current.data];
     return newPrevious;
+  }
+  if (current.operation === OPERATIONS.replace) {
+    return structuredClone(current.data);
   }
   return { ...previous, ...current.data };
 }

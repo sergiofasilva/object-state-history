@@ -19,6 +19,18 @@ describe('ObjectStateHistory constructor', function () {
     }, Error);
   });
 
+  it('Should return an error when try change the imuttable value.', () => {
+    const objHistoryData = { a: '1', b: '2' };
+    const objHist = new ObjectStateHistory(objHistoryData);
+
+    assert.throws(() => {
+      objHist.value = { c: '3' };
+    }, Error);
+    assert.throws(() => {
+      objHist.value.b = '3';
+    }, Error);
+  });
+
   it('Should return an empty object when no parameter is passed to it.', () => {
     const emptyObjHist = new ObjectStateHistory();
     deepStrictEqual(emptyObjHist.value, {});
@@ -67,6 +79,34 @@ describe('ObjectStateHistory merge method', function () {
     }, Error);
   });
 
+  it('Should return an error when no object is passed to it.', () => {
+    const originalObjectData = { a: '1', b: '2' };
+    const objHist = new ObjectStateHistory(originalObjectData);
+
+    assert.throws(() => {
+      objHist.merge('test');
+    }, Error);
+  });
+
+  it('Should return an error when try change the imuttable value.', () => {
+    const objHistoryData = { a: '1', b: '2' };
+    const objHist = new ObjectStateHistory(objHistoryData);
+    const mergeObjHist = objHist.merge({ c: '3' });
+
+    assert.throws(() => {
+      objHist.value = { d: '4' };
+    }, Error);
+    assert.throws(() => {
+      objHist.value.b = '3';
+    }, Error);
+    assert.throws(() => {
+      mergeObjHist.value = { d: '4' };
+    }, Error);
+    assert.throws(() => {
+      mergeObjHist.value.b = '3';
+    }, Error);
+  });
+
   it('Should not change the value when an empty object is passed.', () => {
     const originalObjectData = { a: '1', b: '2', c: { c1: '11', c2: '22' } };
     const objHist = new ObjectStateHistory(originalObjectData);
@@ -102,32 +142,6 @@ describe('ObjectStateHistory merge method', function () {
     objHist.c = '3';
     deepStrictEqual(objHist.value, { a: '1', b: '2', c: '3' });
   });
-
-  // it('Should return an error when no parameter is passed to it.', () => {
-  //   const objHistoryData = { a: '1', b: '2', c: { c1: '11', c2: '22' } };
-  //   let objHist = new ObjectStateHistory(objHistoryData);
-  //   //console.log('GET:', objHist.last());
-  //   console.log('GET1:', objHist);
-  //   const updateObjHist = objHist.merge({ c: { k: '33' } });
-  //   console.log('UPDATE:', updateObjHist);
-  //   objHist.a = 'aa';
-  //   console.log('GET2:', objHist.a);
-  //   console.log('VALUE OF:', objHist.valueOf());
-  //   console.log('LIST:', objHist.list());
-  //   console.log('LIST_ALL:', objHist.listAll());
-  //   console.log('AT 0', objHist.at(0));
-  //   console.log('AT 1', objHist.at(1));
-  //   console.log('AT -1', objHist.at(-1));
-  //   console.log('AT 10', objHist.at(10));
-  //   objHist.a = '11';
-  //   console.log('GET3:', objHist.value);
-
-  //   console.log('DELETE BEFORE:', objHist);
-  //   delete objHist.c.k;
-  //   console.log('DELETE AFTER:', objHist);
-  //   console.log('DELETE LIST ALL:', objHist.listAll());
-  //   console.log('LAST VALUE:', objHist.value);
-  // });
 });
 
 describe('ObjectStateHistory delete operation', function () {
@@ -147,6 +161,19 @@ describe('ObjectStateHistory delete operation', function () {
 });
 
 describe('ObjectStateHistory list method', function () {
+  it('Should return an error when try change the imuttable list.', () => {
+    const objHistoryData = { a: '1', b: '2' };
+    const objHist = new ObjectStateHistory(objHistoryData);
+    const list = objHist.list();
+
+    assert.throws(() => {
+      list[0] = 'test';
+    }, Error);
+    assert.throws(() => {
+      list.push('test');
+    }, Error);
+  });
+
   it('Should have the keys "timestamp", "operation" and "data".', () => {
     const originalObjectData = { a: '1', b: '2' };
     const objHist = new ObjectStateHistory(originalObjectData);
@@ -171,6 +198,14 @@ describe('ObjectStateHistory list method', function () {
     const originalObjectData = { a: '1', b: '2', c: { c1: '11', c2: '22' } };
     const objHist = new ObjectStateHistory(originalObjectData);
     objHist.merge({});
+    const list = objHist.list();
+    strictEqual(list.length, 2);
+  });
+
+  it('Should increment the lenght after call the replace method.', () => {
+    const originalObjectData = { a: '1', b: '2', c: { c1: '11', c2: '22' } };
+    const objHist = new ObjectStateHistory(originalObjectData);
+    objHist.replace({ c: '3' });
     const list = objHist.list();
     strictEqual(list.length, 2);
   });
@@ -213,6 +248,19 @@ describe('ObjectStateHistory list method', function () {
 });
 
 describe('ObjectStateHistory listAll method', function () {
+  it('Should return an error when try change the imuttable listAll.', () => {
+    const objHistoryData = { a: '1', b: '2' };
+    const objHist = new ObjectStateHistory(objHistoryData);
+    const listAll = objHist.listAll();
+
+    assert.throws(() => {
+      listAll[0] = 'test';
+    }, Error);
+    assert.throws(() => {
+      listAll.push('test');
+    }, Error);
+  });
+
   it('Should have the keys "timestamp", "operation", "data" and "value".', () => {
     const originalObjectData = { a: '1', b: '2' };
     const objHist = new ObjectStateHistory(originalObjectData);
@@ -236,6 +284,14 @@ describe('ObjectStateHistory listAll method', function () {
     const originalObjectData = { a: '1', b: '2', c: { c1: '11', c2: '22' } };
     const objHist = new ObjectStateHistory(originalObjectData);
     objHist.merge({});
+    const listAll = objHist.listAll();
+    strictEqual(listAll.length, 2);
+  });
+
+  it('Should increment the lenght after call the replace method.', () => {
+    const originalObjectData = { a: '1', b: '2', c: { c1: '11', c2: '22' } };
+    const objHist = new ObjectStateHistory(originalObjectData);
+    objHist.replace({ c: '3' });
     const listAll = objHist.listAll();
     strictEqual(listAll.length, 2);
   });
@@ -290,6 +346,24 @@ describe('ObjectStateHistory listAll method', function () {
 });
 
 describe('ObjectStateHistory at method', function () {
+  it('Should return an error when try change the imuttable value.', () => {
+    const objHistoryData = { a: '1', b: '2' };
+    const objHist = new ObjectStateHistory(objHistoryData);
+    const atObjHist = objHist.at();
+
+    assert.throws(() => {
+      objHist.value = { d: '4' };
+    }, Error);
+    assert.throws(() => {
+      objHist.value.b = '3';
+    }, Error);
+    assert.throws(() => {
+      atObjHist.value = { d: '4' };
+    }, Error);
+    assert.throws(() => {
+      atObjHist.value.b = '3';
+    }, Error);
+  });
   it('Should return undefined when called with invalid index.', () => {
     const originalObjectData = { a: '1', b: '2' };
     const objHist = new ObjectStateHistory(originalObjectData);
@@ -341,11 +415,52 @@ describe('ObjectStateHistory at method', function () {
     deepStrictEqual(valueMinusOne, valueNoarguments);
     deepStrictEqual(valueMinusOne, objHist.value);
   });
+});
 
-  it('testes', () => {
+describe('ObjectStateHistory replace method', function () {
+  it('Should return an error when no parameter is passed to it.', () => {
     const originalObjectData = { a: '1', b: '2' };
     const objHist = new ObjectStateHistory(originalObjectData);
-    objHist.merge({});
-    console.log('LAST:', objHist);
+
+    assert.throws(() => {
+      objHist.replace();
+    }, Error);
+  });
+
+  it('Should return an error when no object is passed to it.', () => {
+    const originalObjectData = { a: '1', b: '2' };
+    const objHist = new ObjectStateHistory(originalObjectData);
+
+    assert.throws(() => {
+      objHist.replace(123);
+    }, Error);
+  });
+
+  it('Should return an error when try change the imuttable value.', () => {
+    const objHistoryData = { a: '1', b: '2' };
+    const objHist = new ObjectStateHistory(objHistoryData);
+    const mergeObjHist = objHist.replace({ c: '3' });
+
+    assert.throws(() => {
+      objHist.value = { d: '4' };
+    }, Error);
+    assert.throws(() => {
+      objHist.value.c = '3';
+    }, Error);
+    assert.throws(() => {
+      mergeObjHist.value = { d: '4' };
+    }, Error);
+    assert.throws(() => {
+      mergeObjHist.value.c = '3';
+    }, Error);
+  });
+
+  it('Should return as value the object passed as argument.', () => {
+    const originalObjectData = { a: '1', b: '2' };
+    const replaceObjectData = { c: '3' };
+    const objHist = new ObjectStateHistory(originalObjectData);
+    const replaceObject = objHist.replace(replaceObjectData);
+    deepStrictEqual(objHist.value, replaceObjectData);
+    deepStrictEqual(replaceObject, replaceObjectData);
   });
 });
