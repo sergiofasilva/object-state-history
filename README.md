@@ -93,7 +93,11 @@ import ObjectStateHistory from 'object-state-history';
 const obj = { a: 1, b: 2 };
 const objHistory = new ObjectStateHistory(obj);
 
-// Change the value of a property\nobjHistory.a = 3;
+// Change the value of a property
+objHistory.a = 3;
+
+// Change the value of multiple properties
+objHistory.merge({ c: 3, d: 4 });
 
 // Replace the entire object
 objHistory.replace({ a: 4, b: 5 });
