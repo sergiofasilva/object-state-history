@@ -73,57 +73,71 @@ console.log(objHistory.at(0));
 
 &nbsp;
 
+### Sample
+
+```javascript
+import ObjectStateHistory from 'object-state-history';
+
+const obj = { a: 1, b: 2 };
+const objHistory = new ObjectStateHistory(obj);
+
+// Change the value of a property\nobjHistory.a = 3;
+
+// Replace the entire object
+objHistory.replace({ a: 4, b: 5 });
+
+// Delete a property of the object
+delete objHistory.a;
+
+// Get the current state of the object
+const currentState = objHistory.value;
+
+// Get a specific state of the object by index
+const stateAtIndex = objHistory.at(0);
+
+// Get a list of all states of the object
+const stateList = objHistory.listAll();
+```
+
+&nbsp;
+
 ---
+
+&nbsp;
 
 # API
 
-The ObjectStateHistory provides the following methods:
-
-## constructor(object)
-
-The constructor takes an object as an optional parameter. If no object is provided, an empty object is assumed.
+The **ObjectStateHistory** provides the following:
 
 &nbsp;
 
-## merge(data)
+## Constructor
 
-The merge() method takes an object with the changes you want to make to the object.
-
-&nbsp;
-
-## list()
-
-The list() method returns an array of all the changes made to the object up to the current moment.
-
-## listAll()
-
-The listAll() method returns an array of all the changes made to the object, including all intermediate states.
+**new ObjectStateHistory(object)**: creates a new instance of ObjectStateHistory with the initial value of object.
 
 &nbsp;
 
-## at(index = -1)
+## Properties
 
-The at() method returns a snapshot of the object at the specified index in the history. If no index is specified, it returns the current state of the object. If the specified index is out of bounds, undefined is returned.
-
-&nbsp;
-
-## toString()
-
-The toString() method returns a JSON string representation of the current state of the object.
+**value**: returns the current state of the object.
 
 &nbsp;
 
-## valueOf()
+## Methods
 
-The valueOf() method returns the same as the property **value**.
+**merge(data)**: merges the provided data into the current state of the object.
 
-&nbsp;
+**replace(data)**: replaces the current state of the object with the provided data.
 
-## value
+**list()**: returns a list of all the states of the object.
 
-The value getter returns a snapshot of the current state of the object.
+**listAll()**: returns a list of all the states of the object with the history of changes.
 
-&nbsp;
+**at(index)**: returns the state of the object at the given index.
+
+**toString()**: returns a JSON string representation of the current state of the object.
+
+**valueOf()**: returns the same as the property **value**.
 
 &nbsp;
 
