@@ -161,6 +161,9 @@ class ObjectStateHistory {
 }
 
 function mergeItems(previous, current) {
+  if (previous?.constructor !== Object) {
+    throw new Error('The "previous" argument should be of type object.');
+  }
   if (
     !current ||
     (current.operation === OPERATIONS.merge &&
