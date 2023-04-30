@@ -96,7 +96,10 @@ const objHistory = new ObjectStateHistory(obj);
 // Change the value of a property
 objHistory.a = 3;
 
-// Change the value of multiple properties
+// Add a new property
+objHistory.e = 6;
+
+// Change or add multiple properties
 objHistory.merge({ c: 3, d: 4 });
 
 // Replace the entire object
