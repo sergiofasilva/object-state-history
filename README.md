@@ -63,6 +63,12 @@ You can also get a list of all the changes made to the object using the list() m
 console.log(objHistory.list());
 ```
 
+Or get a list of all states of the object using the listAll() method:
+
+```javascript
+const stateList = objHistory.listAll();
+```
+
 And you can retrieve a merged version of the object that reflects all changes up to a specific index in the history by calling the at() method with an index parameter:
 
 ```javascript
