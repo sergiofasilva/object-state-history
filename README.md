@@ -1,6 +1,12 @@
 # ObjectStateHistory
 
+&nbsp;
+
+## ObjectStateHistory - A tool for state management
+
 The ObjectStateHistory is a JavaScript implementation that allows you to keep track of changes in an object over time, creating a history of the modifications.
+
+Maintaining the state of an application in a large software project can be challenging. One advantage of using ObjectStateHistory is that it maintains a history of all the changes to the object's state. This feature is essential when you have lots of data changes to monitor, and you do not want to spend too much time debugging.
 
 &nbsp;
 
