@@ -30,6 +30,11 @@
     "time",
     "list"
   ],
+  "exports": {
+    "import": "./dist/esm/index.js",
+    "require": "./dist/cjs/index.cjs",
+    "default": "./dist/esm/index.js"
+  },
   "author": "Sérgio Silva <sergiofasilva@gmail.com>",
   "license": "MIT",
   "bugs": {
