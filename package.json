@@ -35,6 +35,9 @@
     "time",
     "list"
   ],
+  "devDependencies": {
+    "object-state-history-develop": "github:sergiofasilva/object-state-history#develop"
+  },
   "author": "Sérgio Silva <sergiofasilva@gmail.com>",
   "license": "MIT",
   "bugs": {
