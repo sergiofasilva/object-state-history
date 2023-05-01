@@ -2,7 +2,7 @@
   "name": "object-state-history",
   "version": "0.0.5",
   "description": "The ObjectStateHistory class is a JavaScript implementation that allows you to keep track of changes in an object over time, creating a history of the modifications.",
-  "main": "./dist/esm/index.js",
+  "main": "./index.js",
   "types": "./dist/types/index.d.ts",
   "type": "module",
   "scripts": {
@@ -30,11 +30,6 @@
     "time",
     "list"
   ],
-  "exports": {
-    "import": "./dist/esm/index.js",
-    "require": "./dist/cjs/index.cjs",
-    "default": "./dist/esm/index.js"
-  },
   "author": "Sérgio Silva <sergiofasilva@gmail.com>",
   "license": "MIT",
   "bugs": {
