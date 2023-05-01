@@ -1,4 +1,4 @@
-export default ObjectStateHistory;
+export = ObjectStateHistory;
 declare class ObjectStateHistory {
     static "__#1@#buildItem"(item: any, operation?: string): {
         timestamp: number;

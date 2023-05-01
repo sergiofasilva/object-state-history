@@ -186,5 +186,5 @@ function mergeItems(previous, current) {
     }
     return __assign(__assign({}, previous), current.data);
 }
-export default ObjectStateHistory;
+module.exports = ObjectStateHistory;
 //# sourceMappingURL=index.js.map

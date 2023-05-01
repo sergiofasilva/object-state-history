@@ -17,7 +17,6 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
     return privateMap.get(receiver);
 };
 var _history;
-exports.__esModule = true;
 var OPERATIONS = Object.freeze({
     "delete": 'delete',
     replace: 'replace',
@@ -187,5 +186,5 @@ function mergeItems(previous, current) {
     }
     return __assign(__assign({}, previous), current.data);
 }
-exports["default"] = ObjectStateHistory;
+module.exports = ObjectStateHistory;
 //# sourceMappingURL=index.js.map
