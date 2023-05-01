@@ -1,5 +1,5 @@
 'use strict';
-import ObjectStateHistory from '../index.js';
+import ObjectStateHistory from '../index.mjs';
 import { describe, it, before } from 'node:test';
 import assert, { deepStrictEqual, strictEqual } from 'node:assert/strict';
 

@@ -183,4 +183,4 @@ function mergeItems(previous, current) {
   return { ...previous, ...current.data };
 }
 
-export default ObjectStateHistory;
+module.exports = ObjectStateHistory;
