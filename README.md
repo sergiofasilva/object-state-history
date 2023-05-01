@@ -35,8 +35,6 @@ The ObjectStateHistory can be used by importing it into your module using the im
 import ObjectStateHistory from 'object-state-history';
 ```
 
-&nbsp;
-
 Once imported, create a new instance of ObjectStateHistory by passing an object to the constructor like:
 
 ```javascript
