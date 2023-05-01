@@ -42,8 +42,6 @@ import ObjectStateHistory from 'object-state-history';
 const ObjectStateHistory = require('object-state-history');
 ```
 
-&nbsp;
-
 Once imported, create a new instance of ObjectStateHistory by passing an object to the constructor like:
 
 ```javascript
