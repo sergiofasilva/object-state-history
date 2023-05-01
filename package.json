@@ -1,6 +1,6 @@
 {
   "name": "object-state-history",
-  "version": "2.0.1",
+  "version": "3.0.0",
   "description": "The ObjectStateHistory class is a JavaScript implementation that allows you to keep track of changes in an object over time, creating a history of the modifications.",
   "main": "./index.js",
   "types": "./dist/types/index.d.ts",
