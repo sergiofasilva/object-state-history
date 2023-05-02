@@ -1,7 +1,7 @@
-'use strict';
+'use strict'
 
-import ObjectStateHistory from './index.js';
+import ObjectStateHistory from './index.js'
 
-export default ObjectStateHistory;
+export default ObjectStateHistory
 
-export { ObjectStateHistory };
+export { ObjectStateHistory }
