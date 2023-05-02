@@ -3,14 +3,13 @@
   "version": "3.0.2",
   "description": "The ObjectStateHistory class is a JavaScript implementation that allows you to keep track of changes in an object over time, creating a history of the modifications.",
   "main": "./index.js",
-  "types": "./dist/types/index.d.ts",
+  "types": "./types/index.d.ts",
   "type": "commonjs",
   "scripts": {
-    "test": "node --test",
+    "test": "npx standard && node --test",
     "push": "npm version patch && git push && npm publish",
     "push-minor": "npm version minor && git push && npm publish",
-    "push-major": "npm version major && git push && npm publish",
-    "build": "tsc --project tsconfig.esm.json & tsc --project tsconfig.cjs.json && mv ./dist/cjs/index.js ./dist/cjs/index.cjs"
+    "push-major": "npm version major && git push && npm publish"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -36,7 +35,8 @@
     "list"
   ],
   "devDependencies": {
-    "object-state-history-develop": "github:sergiofasilva/object-state-history#develop"
+    "object-state-history-develop": "github:sergiofasilva/object-state-history#develop",
+    "standard": "*"
   },
   "author": "Sérgio Silva <sergiofasilva@gmail.com>",
   "license": "MIT",
