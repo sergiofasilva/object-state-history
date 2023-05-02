@@ -55,14 +55,14 @@ const objHistory = new ObjectStateHistory({ prop1: 'value1', prop2: 'value2' });
 Once created, you can make changes to the object directly as usual, but they will be tracked automatically by ObjectStateHistory:
 
 ```javascript
-objHistory.prop3 = 'value3';
-delete objHistory.prop1;
+objHistory.prop3 = 'value3'; // { prop1: 'value1', prop2: 'value2', prop3: 'value3' }
+delete objHistory.prop1; // { prop2: 'value2', prop3: 'value3' }
 ```
 
 To retrieve a snapshot of the object at any time, simply call the value getter:
 
 ```javascript
-console.log(objHistory.value);
+console.log(objHistory.value); // { prop2: 'value2', prop3: 'value3' }
 ```
 
 You can also get a list of all the changes made to the object using the list() method:
@@ -96,25 +96,26 @@ const obj = { a: 1, b: 2 };
 const objHistory = new ObjectStateHistory(obj);
 
 // Change the value of a property
-objHistory.a = 3;
+objHistory.a = 3; // { a: 3, b: 2 }
 
 // Add a new property
-objHistory.e = 6;
+objHistory.e = 6; // { a: 3, b: 2, e: 6 }
 
 // Change or add multiple properties
-objHistory.merge({ c: 3, d: 4 });
+objHistory.merge({ b: 4, c: 3, d: 5 });  // { a: 3, b: 4, e: 6, c: 3, d: 5 }
 
 // Replace the entire object
-objHistory.replace({ a: 4, b: 5 });
+objHistory.replace({ a: 4, b: 5 }); // { a: 4, b: 5 }
 
 // Delete a property of the object
-delete objHistory.a;
+delete objHistory.a;  // { b: 5 }
 
 // Get the current state of the object
-const currentState = objHistory.value;
+const currentState = objHistory.value; // { b: 5 }
 
 // Get a specific state of the object by index
-const stateAtIndex = objHistory.at(0);
+// Assumes index -1, if no argument is passed, which corresponds to the last item.
+const stateAtIndex = objHistory.at(0); // { a: 1, b: 2 }
 
 // Get a list of all states of the object
 const stateList = objHistory.listAll();
@@ -154,7 +155,7 @@ The **ObjectStateHistory** provides the following:
 
 **listAll()**: returns a list of all the states of the object with the history of changes.
 
-**at(index)**: returns the state of the object at the given index.
+**at(index)**: returns the state of the object at the given index. Assumes index -1, if no argument is passed, which corresponds to the last item.
 
 **toString()**: returns a JSON string representation of the current state of the object.
 
