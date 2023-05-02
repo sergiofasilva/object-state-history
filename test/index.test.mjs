@@ -192,7 +192,6 @@ describe('ObjectStateHistory list method', function () {
     const objHist = new ObjectStateHistory(originalObjectData)
     const list = objHist.list()
 
-    console.log('Object.keys(list[0]): ', Object.keys(list[0]))
     assert.ok(
       ['timestamp', 'operation', 'data'].every((el) =>
         Object.keys(list[0]).includes(el)
