@@ -7,19 +7,24 @@ describe('ObjectStateHistory constructor', function () {
   it('Should return an error when no object is passed to it.', () => {
     assert.throws(() => {
       const objHist = new ObjectStateHistory([])
-      console.log(objHist) // Not printed. An error occurs first.
+      console.error('This should not print: ', objHist)
     }, Error)
     assert.throws(() => {
       const objHist = new ObjectStateHistory('string')
-      console.log(objHist) // Not printed. An error occurs first.
+      console.error('This should not print: ', objHist)
     }, Error)
     assert.throws(() => {
       const objHist = new ObjectStateHistory(123)
-      console.log(objHist) // Not printed. An error occurs first.
+      console.error('This should not print: ', objHist)
     }, Error)
     assert.throws(() => {
       const objHist = new ObjectStateHistory(new Set())
-      console.log(objHist) // Not printed. An error occurs first.
+      console.error('This should not print: ', objHist)
+    }, Error)
+    assert.throws(() => {
+      let undefinedVar
+      const objHist = new ObjectStateHistory(undefinedVar)
+      console.error('This should not print: ', objHist)
     }, Error)
   })
 
@@ -62,6 +67,18 @@ describe('ObjectStateHistory constructor', function () {
     const objHist = new ObjectStateHistory(objData)
     deepStrictEqual(objData, objDataCopy)
     deepStrictEqual(objData, objHist.value)
+  })
+
+  it('Should not change the original argument when undefined.', () => {
+    let undefinedVar
+    try {
+      const objHist = new ObjectStateHistory(undefinedVar)
+      console.error('This should not print: ', objHist)
+    } catch (error) {
+      assert(error instanceof Error)
+    }
+
+    strictEqual(undefinedVar, undefined)
   })
 
   it('Should not change the value when change the original object.', () => {

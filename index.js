@@ -9,30 +9,30 @@ const OPERATIONS = Object.freeze({
 class ObjectStateHistory {
   #history = []
   constructor (object) {
-    if (object === undefined) {
-      object = {}
-    }
-    if (object.constructor !== Object) {
+    const isValidArgument =
+      arguments.length === 0 || object?.constructor === Object
+
+    if (!isValidArgument) {
       throw new Error('Should be provided an argument of type object.')
     }
-    const obj = structuredClone(object)
+    const obj = structuredClone(object || {})
 
-    this.#history.push(ObjectStateHistory.#buildItem(obj))
+    this.#history.push(ObjectStateHistory.#buildListItem(obj))
     this.#buildObjectRepresentation()
 
     return new Proxy(this, {
-      set (object, key, value, proxy) {
+      set (object, key, value) {
         const obj = {}
         obj[key] = value
         object.#merge(obj)
         return true
       },
-      get: (target, prop, receiver) => {
+      get: (target, prop) => {
         const value = target[prop]
 
         if (value instanceof Function) {
           return function (...args) {
-            return value.apply(this === receiver ? target : this, args)
+            return value.apply(target, args)
           }
         }
         return value || target.value[prop]
@@ -74,15 +74,13 @@ class ObjectStateHistory {
       OPERATIONS.replace
     ].includes(operation)
 
-    const isValidData =
-      data !== undefined &&
-      (!isMergeOrReplaceOperation || data.constructor === Object)
+    const isValidData = !isMergeOrReplaceOperation || data.constructor === Object
 
     if (!isValidData) {
       throw new Error('Should be provided an argument of type object.')
     }
 
-    const item = ObjectStateHistory.#buildItem(data, operation)
+    const item = ObjectStateHistory.#buildListItem(data, operation)
     this.#history.push(item)
     this.#buildObjectRepresentation(item)
 
@@ -101,7 +99,7 @@ class ObjectStateHistory {
         el.value =
           idx === 0
             ? { ...el.data }
-            : mergeItems(historyList[idx - 1].value, el)
+            : mergeItemToObject(historyList[idx - 1].value, el)
         return el
       })
     } catch (error) {
@@ -128,9 +126,9 @@ class ObjectStateHistory {
   }
 
   #mergeListOfObjects (list) {
-    list = list || this.#history
-    const merged = list.reduce((previous, current) => {
-      return mergeItems(previous, current)
+    const historyList = list ? [...list] : this.#history
+    const merged = historyList.reduce((previous, current) => {
+      return mergeItemToObject(previous, current)
     }, {})
     return Object.freeze(merged)
   }
@@ -138,8 +136,7 @@ class ObjectStateHistory {
   #buildObjectRepresentation (lastItem) {
     if (lastItem && lastItem.operation === OPERATIONS.delete) {
       delete this[lastItem.data]
-    }
-    if (lastItem && lastItem.operation === OPERATIONS.replace) {
+    } else if (lastItem && lastItem.operation === OPERATIONS.replace) {
       for (const key of Object.keys(this)) {
         delete this[key]
       }
@@ -147,11 +144,11 @@ class ObjectStateHistory {
     Object.keys(this.value).forEach((key) => (this[key] = this.value[key]))
   }
 
-  static #buildItem (item, operation = OPERATIONS.merge) {
+  static #buildListItem (data, operation = OPERATIONS.merge) {
     return {
       timestamp: Date.now(),
       operation,
-      data: item
+      data
     }
   }
 
@@ -160,27 +157,16 @@ class ObjectStateHistory {
   }
 }
 
-function mergeItems (previous, current) {
-  if (previous?.constructor !== Object) {
-    throw new Error('The "previous" argument should be of type object.')
-  }
-  if (
-    !current ||
-    (current.operation === OPERATIONS.merge &&
-      current?.data?.constructor !== Object)
-  ) {
-    return { ...previous }
-  }
-
-  if (current.operation === OPERATIONS.delete) {
-    const newPrevious = structuredClone(previous)
-    delete newPrevious[current.data]
+function mergeItemToObject (currentObject, nextItem) {
+  if (nextItem.operation === OPERATIONS.delete) {
+    const newPrevious = structuredClone(currentObject)
+    delete newPrevious[nextItem.data]
     return newPrevious
   }
-  if (current.operation === OPERATIONS.replace) {
-    return structuredClone(current.data)
+  if (nextItem.operation === OPERATIONS.replace) {
+    return structuredClone(nextItem.data)
   }
-  return { ...previous, ...current.data }
+  return { ...currentObject, ...nextItem.data }
 }
 
 module.exports = ObjectStateHistory

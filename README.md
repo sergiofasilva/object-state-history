@@ -36,51 +36,51 @@ yarn add object-state-history
 The ObjectStateHistory can be used by importing it into your module using the import statement, like so:
 
 ```javascript
-import ObjectStateHistory from 'object-state-history';
+import ObjectStateHistory from 'object-state-history'
 ```
 
 &nbsp;
 ... _or with **require** (CommonJS)_:
 
 ```javascript
-const ObjectStateHistory = require('object-state-history');
+const ObjectStateHistory = require('object-state-history')
 ```
 
 Once imported, create a new instance of ObjectStateHistory by passing an object to the constructor like:
 
 ```javascript
-const objHistory = new ObjectStateHistory({ prop1: 'value1', prop2: 'value2' });
+const objHistory = new ObjectStateHistory({ prop1: 'value1', prop2: 'value2' })
 ```
 
 Once created, you can make changes to the object directly as usual, but they will be tracked automatically by ObjectStateHistory:
 
 ```javascript
-objHistory.prop3 = 'value3'; // { prop1: 'value1', prop2: 'value2', prop3: 'value3' }
-delete objHistory.prop1; // { prop2: 'value2', prop3: 'value3' }
+objHistory.prop3 = 'value3' // { prop1: 'value1', prop2: 'value2', prop3: 'value3' }
+delete objHistory.prop1 // { prop2: 'value2', prop3: 'value3' }
 ```
 
 To retrieve a snapshot of the object at any time, simply call the value getter:
 
 ```javascript
-console.log(objHistory.value); // { prop2: 'value2', prop3: 'value3' }
+console.log(objHistory.value) // { prop2: 'value2', prop3: 'value3' }
 ```
 
 You can also get a list of all the changes made to the object using the list() method:
 
 ```javascript
-console.log(objHistory.list());
+console.log(objHistory.list())
 ```
 
 Or get a list of all states of the object using the listAll() method:
 
 ```javascript
-console.log(objHistory.listAll());
+console.log(objHistory.listAll())
 ```
 
 And you can retrieve a merged version of the object that reflects all changes up to a specific index in the history by calling the at() method with an index parameter:
 
 ```javascript
-console.log(objHistory.at(0));
+console.log(objHistory.at(0))
 ```
 
 &nbsp;
@@ -90,35 +90,35 @@ console.log(objHistory.at(0));
 ### Sample
 
 ```javascript
-import ObjectStateHistory from 'object-state-history';
+import ObjectStateHistory from 'object-state-history'
 
-const obj = { a: 1, b: 2 };
-const objHistory = new ObjectStateHistory(obj);
+const obj = { a: 1, b: 2 }
+const objHistory = new ObjectStateHistory(obj)
 
 // Change the value of a property
-objHistory.a = 3; // { a: 3, b: 2 }
+objHistory.a = 3 // { a: 3, b: 2 }
 
 // Add a new property
-objHistory.e = 6; // { a: 3, b: 2, e: 6 }
+objHistory.e = 6 // { a: 3, b: 2, e: 6 }
 
 // Change or add multiple properties
-objHistory.merge({ b: 4, c: 3, d: 5 });  // { a: 3, b: 4, e: 6, c: 3, d: 5 }
+objHistory.merge({ b: 4, c: 3, d: 5 })  // { a: 3, b: 4, e: 6, c: 3, d: 5 }
 
 // Replace the entire object
-objHistory.replace({ a: 4, b: 5 }); // { a: 4, b: 5 }
+objHistory.replace({ a: 4, b: 5 }) // { a: 4, b: 5 }
 
 // Delete a property of the object
-delete objHistory.a;  // { b: 5 }
+delete objHistory.a  // { b: 5 }
 
 // Get the current state of the object
-const currentState = objHistory.value; // { b: 5 }
+const currentState = objHistory.value // { b: 5 }
 
 // Get a specific state of the object by index
 // Assumes index -1, if no argument is passed, which corresponds to the last item.
-const stateAtIndex = objHistory.at(0); // { a: 1, b: 2 }
+const stateAtIndex = objHistory.at(0) // { a: 1, b: 2 }
 
 // Get a list of all states of the object
-const stateList = objHistory.listAll();
+const stateList = objHistory.listAll()
 ```
 
 &nbsp;
