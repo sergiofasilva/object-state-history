@@ -9,8 +9,7 @@ const OPERATIONS = Object.freeze({
 class ObjectStateHistory {
   #history = []
   constructor (object) {
-    const isValidArgument =
-      arguments.length === 0 || object?.constructor === Object
+    const isValidArgument = arguments.length === 0 || object?.constructor === Object
 
     if (!isValidArgument) {
       throw new Error('Should be provided an argument of type object.')
@@ -74,7 +73,8 @@ class ObjectStateHistory {
       OPERATIONS.replace
     ].includes(operation)
 
-    const isValidData = !isMergeOrReplaceOperation || data.constructor === Object
+    const isValidData =
+      !isMergeOrReplaceOperation || data.constructor === Object
 
     if (!isValidData) {
       throw new Error('Should be provided an argument of type object.')
@@ -157,16 +157,16 @@ class ObjectStateHistory {
   }
 }
 
-function mergeItemToObject (currentObject, nextItem) {
-  if (nextItem.operation === OPERATIONS.delete) {
-    const newPrevious = structuredClone(currentObject)
-    delete newPrevious[nextItem.data]
+function mergeItemToObject (object, itemToMerge) {
+  if (itemToMerge.operation === OPERATIONS.delete) {
+    const newPrevious = structuredClone(object)
+    delete newPrevious[itemToMerge.data]
     return newPrevious
   }
-  if (nextItem.operation === OPERATIONS.replace) {
-    return structuredClone(nextItem.data)
+  if (itemToMerge.operation === OPERATIONS.replace) {
+    return structuredClone(itemToMerge.data)
   }
-  return { ...currentObject, ...nextItem.data }
+  return { ...object, ...itemToMerge.data }
 }
 
 module.exports = ObjectStateHistory
