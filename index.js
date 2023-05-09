@@ -37,10 +37,7 @@ class ObjectStateHistory {
         return value || target.value[prop]
       },
       deleteProperty (target, prop) {
-        const newObj = structuredClone(target.value)
-        if (prop in newObj) {
-          target.#merge(prop, OPERATIONS.delete)
-        }
+        target.#merge(prop, OPERATIONS.delete)
         return true
       }
     })
