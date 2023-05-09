@@ -149,12 +149,28 @@ describe('ObjectStateHistory merge method', function () {
     deepStrictEqual(objHist.value, lastObjectData)
   })
 
+  it('Should keep the value unchanged when merge properties to its current values, and increment the history.', () => {
+    const originalObjectData = { a: '1', b: '2' }
+    const objHist = new ObjectStateHistory(originalObjectData)
+    objHist.merge({ a: '1', b: '2' })
+    deepStrictEqual(objHist.value, { a: '1', b: '2' })
+    strictEqual(objHist.list().length, 2)
+  })
+
   it('Should merge the property changed.', () => {
     const originalObjectData = { a: '1', b: '2' }
 
     const objHist = new ObjectStateHistory(originalObjectData)
     objHist.a = '11'
     deepStrictEqual(objHist.value, { a: '11', b: '2' })
+  })
+
+  it('Should keep the value unchanged when changing a property to its current value, and increment the history.', () => {
+    const originalObjectData = { a: '1', b: '2' }
+    const objHist = new ObjectStateHistory(originalObjectData)
+    objHist.b = '2'
+    deepStrictEqual(objHist.value, { a: '1', b: '2' })
+    strictEqual(objHist.list().length, 2)
   })
 
   it('Should add the property changed.', () => {
@@ -187,6 +203,14 @@ describe('ObjectStateHistory delete operation', function () {
     const objHist = new ObjectStateHistory(originalObjectData)
     delete objHist.b
     deepStrictEqual(objHist.value, { a: '1' })
+  })
+
+  it('Should keep the value unchanged when deleting a property that does not exist, and increment the history.', () => {
+    const originalObjectData = { a: '1', b: '2' }
+    const objHist = new ObjectStateHistory(originalObjectData)
+    delete objHist.c
+    deepStrictEqual(objHist.value, { a: '1', b: '2' })
+    strictEqual(objHist.list().length, 2)
   })
 })
 
@@ -266,13 +290,13 @@ describe('ObjectStateHistory list method', function () {
     strictEqual(list.length, 2)
   })
 
-  it('Should keep the lenght after delete an inexistent property.', () => {
+  it('Should increment the lenght after delete an inexistent property.', () => {
     const originalObjectData = { a: '1', b: '2' }
 
     const objHist = new ObjectStateHistory(originalObjectData)
     delete objHist.z
     const list = objHist.list()
-    strictEqual(list.length, 1)
+    strictEqual(list.length, 2)
   })
 })
 
@@ -352,13 +376,13 @@ describe('ObjectStateHistory listAll method', function () {
     strictEqual(listAll.length, 2)
   })
 
-  it('Should keep the lenght after delete an inexistent property.', () => {
+  it('Should increment the lenght after delete an inexistent property.', () => {
     const originalObjectData = { a: '1', b: '2' }
 
     const objHist = new ObjectStateHistory(originalObjectData)
     delete objHist.z
     const listAll = objHist.listAll()
-    strictEqual(listAll.length, 1)
+    strictEqual(listAll.length, 2)
   })
 
   it('Should return an empty array if "list" method throws an error.', async (ctx) => {
