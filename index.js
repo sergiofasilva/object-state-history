@@ -16,7 +16,7 @@ class ObjectStateHistory {
     }
     const obj = structuredClone(object || {})
 
-    this.#addItem(obj)
+    this.#merge(obj)
 
     return new Proxy(this, {
       set (object, key, value) {
