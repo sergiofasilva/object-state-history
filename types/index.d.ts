@@ -13,7 +13,6 @@ declare class ObjectStateHistory {
     merge(data: any): any;
     replace(data: any): any;
     list(): any;
-    listAll(): any;
     at(index?: number): any;
     #private;
 }
