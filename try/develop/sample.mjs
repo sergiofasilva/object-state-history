@@ -28,5 +28,5 @@ const stateAtIndex = objHistory.at(0) // { a: 1, b: 2 }
 console.log(stateAtIndex)
 
 // Get a list of all states of the object
-const stateList = objHistory.listAll()
+const stateList = objHistory.list()
 console.log(stateList)

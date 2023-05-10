@@ -65,16 +65,10 @@ To retrieve a snapshot of the object at any time, simply call the value getter:
 console.log(objHistory.value) // { prop2: 'value2', prop3: 'value3' }
 ```
 
-You can also get a list of all the changes made to the object using the list() method:
+You can also get a list of all states and changes made to the object using the list() method:
 
 ```javascript
 console.log(objHistory.list())
-```
-
-Or get a list of all states of the object using the listAll() method:
-
-```javascript
-console.log(objHistory.listAll())
 ```
 
 And you can retrieve a merged version of the object that reflects all changes up to a specific index in the history by calling the at() method with an index parameter:
@@ -117,8 +111,8 @@ const currentState = objHistory.value // { b: 5 }
 // Assumes index -1, if no argument is passed, which corresponds to the last item.
 const stateAtIndex = objHistory.at(0) // { a: 1, b: 2 }
 
-// Get a list of all states of the object
-const stateList = objHistory.listAll()
+// Get a list of all states and the changes of the object
+const stateList = objHistory.list()
 ```
 
 &nbsp;
@@ -151,9 +145,7 @@ The **ObjectStateHistory** provides the following:
 
 **replace(data)**: replaces the current state of the object with the provided data.
 
-**list()**: returns a list of all the states of the object.
-
-**listAll()**: returns a list of all the states of the object with the history of changes.
+**list()**: returns a list of all the states of the object with the history of changes.
 
 **at(index)**: returns the state of the object at the given index. Assumes index -1, if no argument is passed, which corresponds to the last item.
 

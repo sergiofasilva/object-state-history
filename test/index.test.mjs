@@ -228,13 +228,13 @@ describe('ObjectStateHistory list method', function () {
     }, Error)
   })
 
-  it('Should have the keys "timestamp", "operation" and "data".', () => {
+  it('Should have the keys "timestamp", "operation", "data" and "value".', () => {
     const originalObjectData = { a: '1', b: '2' }
     const objHist = new ObjectStateHistory(originalObjectData)
     const list = objHist.list()
 
     assert.ok(
-      ['timestamp', 'operation', 'data'].every((el) =>
+      ['timestamp', 'operation', 'data', 'value'].every((el) =>
         Object.keys(list[0]).includes(el)
       )
     )
@@ -297,104 +297,6 @@ describe('ObjectStateHistory list method', function () {
     delete objHist.z
     const list = objHist.list()
     strictEqual(list.length, 2)
-  })
-})
-
-describe('ObjectStateHistory listAll method', function () {
-  it('Should return an error when try change the imuttable listAll.', () => {
-    const objHistoryData = { a: '1', b: '2' }
-    const objHist = new ObjectStateHistory(objHistoryData)
-    const listAll = objHist.listAll()
-
-    assert.throws(() => {
-      listAll[0] = 'test'
-    }, Error)
-    assert.throws(() => {
-      listAll.push('test')
-    }, Error)
-  })
-
-  it('Should have the keys "timestamp", "operation", "data" and "value".', () => {
-    const originalObjectData = { a: '1', b: '2' }
-    const objHist = new ObjectStateHistory(originalObjectData)
-    const listAll = objHist.listAll()
-
-    assert.ok(
-      ['timestamp', 'operation', 'data', 'value'].every((el) =>
-        Object.keys(listAll[0]).includes(el)
-      )
-    )
-  })
-
-  it('Should have a lenght of 1 after call the constructor.', () => {
-    const originalObjectData = { a: '1', b: '2' }
-    const objHist = new ObjectStateHistory(originalObjectData)
-    const listAll = objHist.listAll()
-    strictEqual(listAll.length, 1)
-  })
-
-  it('Should increment the lenght after call the merge method.', () => {
-    const originalObjectData = { a: '1', b: '2', c: { c1: '11', c2: '22' } }
-    const objHist = new ObjectStateHistory(originalObjectData)
-    objHist.merge({})
-    const listAll = objHist.listAll()
-    strictEqual(listAll.length, 2)
-  })
-
-  it('Should increment the lenght after call the replace method.', () => {
-    const originalObjectData = { a: '1', b: '2', c: { c1: '11', c2: '22' } }
-    const objHist = new ObjectStateHistory(originalObjectData)
-    objHist.replace({ c: '3' })
-    const listAll = objHist.listAll()
-    strictEqual(listAll.length, 2)
-  })
-
-  it('Should increment the lenght after change an existent property.', () => {
-    const originalObjectData = { a: '1', b: '2' }
-
-    const objHist = new ObjectStateHistory(originalObjectData)
-    objHist.a = '11'
-    const listAll = objHist.listAll()
-    strictEqual(listAll.length, 2)
-  })
-
-  it('Should increment the lenght after change an inexistent property.', () => {
-    const originalObjectData = { a: '1', b: '2' }
-
-    const objHist = new ObjectStateHistory(originalObjectData)
-    objHist.z = '11'
-    const listAll = objHist.listAll()
-    strictEqual(listAll.length, 2)
-  })
-
-  it('Should increment the lenght after delete an existent property.', () => {
-    const originalObjectData = { a: '1', b: '2' }
-
-    const objHist = new ObjectStateHistory(originalObjectData)
-    delete objHist.b
-    const listAll = objHist.listAll()
-    strictEqual(listAll.length, 2)
-  })
-
-  it('Should increment the lenght after delete an inexistent property.', () => {
-    const originalObjectData = { a: '1', b: '2' }
-
-    const objHist = new ObjectStateHistory(originalObjectData)
-    delete objHist.z
-    const listAll = objHist.listAll()
-    strictEqual(listAll.length, 2)
-  })
-
-  it('Should return an empty array if "list" method throws an error.', async (ctx) => {
-    const originalObjectData = { a: '1', b: '2' }
-    const objHist = new ObjectStateHistory(originalObjectData)
-
-    ctx.mock.method(objHist, 'list', () => {
-      throw new Error('Test error.')
-    })
-
-    const emptyList = await objHist.listAll()
-    deepStrictEqual(emptyList, [])
   })
 })
 

@@ -7,7 +7,7 @@ const OPERATIONS = Object.freeze({
 })
 
 class ObjectStateHistory {
-  #history = []
+  #list = []
   constructor (object) {
     const isValidArgument = arguments.length === 0 || object?.constructor === Object
 
@@ -16,8 +16,7 @@ class ObjectStateHistory {
     }
     const obj = structuredClone(object || {})
 
-    this.#history.push(ObjectStateHistory.#buildListItem(obj))
-    this.#buildObjectRepresentation()
+    this.#addItem(obj)
 
     return new Proxy(this, {
       set (object, key, value) {
@@ -34,7 +33,7 @@ class ObjectStateHistory {
             return value.apply(target, args)
           }
         }
-        return value || target.value[prop]
+        return value
       },
       deleteProperty (target, prop) {
         target.#merge(prop, OPERATIONS.delete)
@@ -52,8 +51,7 @@ class ObjectStateHistory {
   }
 
   get value () {
-    const lastItem = this.#mergeListOfObjects()
-    return ObjectStateHistory.#getFreezedClonedObject(lastItem)
+    return ObjectStateHistory.#getFreezedClonedObject(this.#list[this.#list.length - 1]?.value)
   }
 
   merge (data) {
@@ -62,6 +60,16 @@ class ObjectStateHistory {
 
   replace (data) {
     return this.#merge(data, OPERATIONS.replace)
+  }
+
+  #addItem (data, operation = OPERATIONS.merge) {
+    const newItem = ObjectStateHistory.#buildListItem(data, operation)
+
+    const lastValue = this.#list[this.#list.length - 1]?.value || {}
+    const lastItem = mergeItemToObject(lastValue, newItem)
+    newItem.value = lastItem
+    this.#list.push(newItem)
+    this.#buildObjectRepresentation()
   }
 
   #merge (data, operation = OPERATIONS.merge) {
@@ -77,67 +85,23 @@ class ObjectStateHistory {
       throw new Error('Should be provided an argument of type object.')
     }
 
-    const item = ObjectStateHistory.#buildListItem(data, operation)
-    this.#history.push(item)
-    this.#buildObjectRepresentation(item)
+    this.#addItem(data, operation)
 
     return this.value
   }
 
   list () {
-    return ObjectStateHistory.#getFreezedClonedObject(this.#history)
-  }
-
-  listAll () {
-    let history
-    try {
-      const historyList = this.list()
-      history = historyList.map((el, idx) => {
-        el.value =
-          idx === 0
-            ? { ...el.data }
-            : mergeItemToObject(historyList[idx - 1].value, el)
-        return el
-      })
-    } catch (error) {
-      history = []
-    }
-
-    return ObjectStateHistory.#getFreezedClonedObject(history)
+    return ObjectStateHistory.#getFreezedClonedObject(this.#list)
   }
 
   at (index = -1) {
-    if (!Number.isInteger(index)) {
-      return undefined
-    }
+    const idx = index < 0 ? this.#list.length + index : index
+    const itemAtIndex = this.#list[idx]
 
-    index = index < 0 ? this.#history.length + index : index
-    const itemAtIndex = this.#history[index]
-    if (itemAtIndex === undefined) {
-      return undefined
-    }
-
-    const historyToIndex = this.#history.slice(0, index + 1)
-    const item = this.#mergeListOfObjects(historyToIndex)
-    return ObjectStateHistory.#getFreezedClonedObject(item)
+    return ObjectStateHistory.#getFreezedClonedObject(itemAtIndex?.value)
   }
 
-  #mergeListOfObjects (list) {
-    const historyList = list ? [...list] : this.#history
-    const merged = historyList.reduce((previous, current) => {
-      return mergeItemToObject(previous, current)
-    }, {})
-    return Object.freeze(merged)
-  }
-
-  #buildObjectRepresentation (lastItem) {
-    if (lastItem && lastItem.operation === OPERATIONS.delete) {
-      delete this[lastItem.data]
-    } else if (lastItem && lastItem.operation === OPERATIONS.replace) {
-      for (const key of Object.keys(this)) {
-        delete this[key]
-      }
-    }
+  #buildObjectRepresentation () {
     Object.keys(this.value).forEach((key) => (this[key] = this.value[key]))
   }
 
