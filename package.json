@@ -35,7 +35,7 @@
     "list"
   ],
   "devDependencies": {
-    "object-state-history-develop": "github:sergiofasilva/object-state-history#develop",
+    "object-state-history-main": "github:sergiofasilva/object-state-history#main",
     "standard": "*"
   },
   "author": "Sérgio Silva <sergiofasilva@gmail.com>",

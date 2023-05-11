@@ -1,4 +1,4 @@
-const ObjectStateHistory = require('object-state-history-develop')
+const ObjectStateHistory = require('object-state-history-main')
 
 const obj = { a: 1, b: 2 }
 const objHistory = new ObjectStateHistory(obj)

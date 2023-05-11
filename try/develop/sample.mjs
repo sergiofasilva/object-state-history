@@ -1,4 +1,4 @@
-import ObjectStateHistory from 'object-state-history-develop'
+import ObjectStateHistory from 'object-state-history-main'
 
 const obj = { a: 1, b: 2 }
 const objHistory = new ObjectStateHistory(obj)
