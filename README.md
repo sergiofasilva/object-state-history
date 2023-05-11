@@ -1,4 +1,5 @@
 # ObjectStateHistory
+
 [![npm version](https://img.shields.io/npm/v/object-state-history)](https://www.npmjs.com/package/object-state-history)
 [![Build Status](https://img.shields.io/github/actions/workflow/status/sergiofasilva/object-state-history/ci.yml)](https://github.com/sergiofasilva/object-state-history/actions)
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](https://standardjs.com/)
@@ -11,6 +12,8 @@
 The ObjectStateHistory is a JavaScript implementation that allows you to keep track of changes in an object over time, creating a history of the modifications.
 
 Maintaining the state of an application in a large software project can be challenging. One advantage of using ObjectStateHistory is that it maintains a history of all the changes to the object's state. This feature is essential when you have lots of data changes to monitor, and you do not want to spend too much time debugging.
+
+Since each change creates a new state of the object without changing the previous states, we have, in a sense, an object with immutability characteristics, or a list of immutable objects.
 
 &nbsp;
 
@@ -96,13 +99,13 @@ objHistory.a = 3 // { a: 3, b: 2 }
 objHistory.e = 6 // { a: 3, b: 2, e: 6 }
 
 // Change or add multiple properties
-objHistory.merge({ b: 4, c: 3, d: 5 })  // { a: 3, b: 4, e: 6, c: 3, d: 5 }
+objHistory.merge({ b: 4, c: 3, d: 5 }) // { a: 3, b: 4, e: 6, c: 3, d: 5 }
 
 // Replace the entire object
 objHistory.replace({ a: 4, b: 5 }) // { a: 4, b: 5 }
 
 // Delete a property of the object
-delete objHistory.a  // { b: 5 }
+delete objHistory.a // { b: 5 }
 
 // Get the current state of the object
 const currentState = objHistory.value // { b: 5 }
