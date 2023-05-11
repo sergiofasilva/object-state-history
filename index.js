@@ -42,16 +42,19 @@ class ObjectStateHistory {
     })
   }
 
+  get value () {
+    return this.at()
+  }
+
   valueOf () {
     return this.value
   }
 
-  toString () {
-    return JSON.stringify(this.value)
-  }
+  at (index = -1) {
+    const idx = index < 0 ? this.#list.length + index : index
+    const itemAtIndex = this.#list[idx]
 
-  get value () {
-    return ObjectStateHistory.#getFreezedClonedObject(this.#list[this.#list.length - 1]?.value)
+    return ObjectStateHistory.#getFreezedClonedObject(itemAtIndex?.value)
   }
 
   merge (data) {
@@ -62,43 +65,34 @@ class ObjectStateHistory {
     return this.#merge(data, OPERATIONS.replace)
   }
 
+  list () {
+    return ObjectStateHistory.#getFreezedClonedObject(this.#list)
+  }
+
+  toString () {
+    return JSON.stringify(this.value)
+  }
+
   #addItem (data, operation = OPERATIONS.merge) {
     const newItem = ObjectStateHistory.#buildListItem(data, operation)
-
     const lastValue = this.#list[this.#list.length - 1]?.value || {}
     const lastItem = mergeItemToObject(lastValue, newItem)
+
     newItem.value = lastItem
     this.#list.push(newItem)
     this.#buildObjectRepresentation()
   }
 
   #merge (data, operation = OPERATIONS.merge) {
-    const isMergeOrReplaceOperation = [
-      OPERATIONS.merge,
-      OPERATIONS.replace
-    ].includes(operation)
-
-    const isValidData =
-      !isMergeOrReplaceOperation || data.constructor === Object
+    const isMergeOrReplaceOperation = [OPERATIONS.merge, OPERATIONS.replace].includes(operation)
+    const isValidData = !isMergeOrReplaceOperation || data.constructor === Object
 
     if (!isValidData) {
       throw new Error('Should be provided an argument of type object.')
     }
 
     this.#addItem(data, operation)
-
     return this.value
-  }
-
-  list () {
-    return ObjectStateHistory.#getFreezedClonedObject(this.#list)
-  }
-
-  at (index = -1) {
-    const idx = index < 0 ? this.#list.length + index : index
-    const itemAtIndex = this.#list[idx]
-
-    return ObjectStateHistory.#getFreezedClonedObject(itemAtIndex?.value)
   }
 
   #buildObjectRepresentation () {
