@@ -16,7 +16,7 @@ class ObjectStateHistory {
       throw new Error('Should be provided an argument of type object.')
     }
 
-    this.#getValidOptions(options)
+    this.#setOptions(options)
     const obj = structuredClone(object || {})
 
     this.#merge(obj)
@@ -75,7 +75,8 @@ class ObjectStateHistory {
   info () {
     return {
       options: { ...this.#options },
-      list: this.list()
+      list: this.list(),
+      value: this.value
     }
   }
 
@@ -83,7 +84,7 @@ class ObjectStateHistory {
     return JSON.stringify(this.value)
   }
 
-  #getValidOptions (options) {
+  #setOptions (options) {
     if (options === undefined || options === null) {
       return
     }
@@ -95,18 +96,20 @@ class ObjectStateHistory {
     const schemaOptions = {
       limit: value => isNaturalNumber(value)
     }
-    schemaOptions.limit.required = true
+    // schemaOptions.limit.required = false
 
     const validate = (object, schema) => Object
       .entries(schema)
-      .filter(key => key in object)
       .map(([key, validate]) => [
         key,
-        !validate.required || (key in object),
-        validate(object[key])
+        // Only necessary if we had required options
+        //! validate.required || (key in object),
+        !(key in object) || validate(object[key])
       ])
       .filter(([_, ...tests]) => !tests.every(Boolean))
-      .map(([key, invalid]) => new Error(`Option ${key} is ${invalid ? 'invalid' : 'required'}.`))
+      // Only necessary if we had required options
+      // .map(([key, invalid]) => new Error(`Option ${key} is ${invalid ? 'invalid' : 'required'}.`))
+      .map(key => new Error(`Option ${key} is 'invalid'.`))
 
     const errors = validate(options, schemaOptions)
 
@@ -174,7 +177,8 @@ function mergeItemToObject (object, itemToMerge) {
 }
 
 function isNaturalNumber (value) {
-  const number = Number(value)
+  const isValidType = [Number, String].includes(value.constructor)
+  const number = isValidType && Number(value)
   const isInteger = Number.isInteger(number)
   const isNegative = value < 0
   const isNatural = isInteger && !isNegative
