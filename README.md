@@ -148,9 +148,9 @@ The **ObjectStateHistory** provides the following:
 
 **info()**: returns an object with the properties: options, list and value.
 
-- options: an object with the options assumed by ObjectStateHistory;
-- list: same as the **list()** method;
-- value: same as the **valueOf()** method or the **value** property.
+- _options_: an object with the options assumed by ObjectStateHistory;
+- _list_: same as the **list()** method;
+- _value_: same as the **valueOf()** method or the **value** property.
 
 **list()**: returns a list of all the states of the object with the history of changes.
 
