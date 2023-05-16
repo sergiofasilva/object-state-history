@@ -8,12 +8,15 @@ const OPERATIONS = Object.freeze({
 
 class ObjectStateHistory {
   #list = []
-  constructor (object) {
+  #options = {}
+  constructor (object, options) {
     const isValidArgument = arguments.length === 0 || object?.constructor === Object
 
     if (!isValidArgument) {
       throw new Error('Should be provided an argument of type object.')
     }
+
+    this.#setOptions(options)
     const obj = structuredClone(object || {})
 
     this.#merge(obj)
@@ -69,8 +72,54 @@ class ObjectStateHistory {
     return ObjectStateHistory.#getFreezedClonedObject(this.#list)
   }
 
+  info () {
+    return {
+      options: { ...this.#options },
+      list: this.list(),
+      value: this.value
+    }
+  }
+
   toString () {
     return JSON.stringify(this.value)
+  }
+
+  #setOptions (options) {
+    if (options === undefined || options === null) {
+      return
+    }
+
+    if (options.constructor !== Object) {
+      throw new Error('When provided, the options parameter must be of type object.')
+    }
+
+    const schemaOptions = {
+      limit: value => isNaturalNumber(value)
+    }
+    // schemaOptions.limit.required = false
+
+    const validate = (object, schema) => Object
+      .entries(schema)
+      .map(([key, validate]) => [
+        key,
+        // Only necessary if we had required options
+        //! validate.required || (key in object),
+        !(key in object) || validate(object[key])
+      ])
+      .filter(([_, ...tests]) => !tests.every(Boolean))
+      // Only necessary if we had required options
+      // .map(([key, invalid]) => new Error(`Option ${key} is ${invalid ? 'invalid' : 'required'}.`))
+      .map(key => new Error(`Option ${key} is 'invalid'.`))
+
+    const errors = validate(options, schemaOptions)
+
+    if (errors.length > 0) {
+      throw new Error(errors[0])
+    } else {
+      this.#options = {
+        limit: +options.limit || 0
+      }
+    }
   }
 
   #addItem (data, operation = OPERATIONS.merge) {
@@ -80,6 +129,9 @@ class ObjectStateHistory {
 
     newItem.value = lastItem
     this.#list.push(newItem)
+    if (this.#options?.limit) {
+      this.#list = this.#list.slice(-this.#options.limit)
+    }
     this.#buildObjectRepresentation()
   }
 
@@ -122,6 +174,15 @@ function mergeItemToObject (object, itemToMerge) {
     return structuredClone(itemToMerge.data)
   }
   return { ...object, ...itemToMerge.data }
+}
+
+function isNaturalNumber (value) {
+  const isValidType = [Number, String].includes(value.constructor)
+  const number = isValidType && Number(value)
+  const isInteger = Number.isInteger(number)
+  const isNegative = value < 0
+  const isNatural = isInteger && !isNegative
+  return isNatural
 }
 
 module.exports = ObjectStateHistory

@@ -144,19 +144,44 @@ The **ObjectStateHistory** provides the following:
 
 ## Methods
 
-**merge(data)**: merges the provided data into the current state of the object.
+**at(index)**: returns the state of the object at the given index, allowing for positive and negative integers. Negative integers count back from the last item in the array. Assumes index -1, if no argument is passed, which corresponds to the last item.
 
-**replace(data)**: replaces the current state of the object with the provided data.
+**info()**: returns an object with the properties: options, list and value.
+
+- options: an object with the options assumed by ObjectStateHistory;
+- list: same as the **list()** method;
+- value: same as the **valueOf()** method or the **value** property.
 
 **list()**: returns a list of all the states of the object with the history of changes.
 
-**at(index)**: returns the state of the object at the given index. Assumes index -1, if no argument is passed, which corresponds to the last item.
+**merge(data)**: merges the provided data into the current state of the object.
+
+**replace(data)**: replaces the current state of the object with the provided data.
 
 **toString()**: returns a JSON string representation of the current state of the object.
 
 **valueOf()**: returns the same as the property **value**.
 
 &nbsp;
+
+## Options
+
+If you use very **large objects** and / or make **many changes** to objects, this can result in the ObjectStateHistory taking up a **lot of memory**. If this is a problem for you or if you don't need to have a very large history, it is possible to limit the number of changes stored in history.
+
+In the constructor you can send as a second parameter an object with the options:
+
+```javascript
+const options = {
+  limit: 5
+}
+
+const obj = { a: 1, b: 2 }
+const objHistory = new ObjectStateHistory(obj, options)
+```
+
+At the moment the only option available is **limit**, but in the future there may be more.
+
+The **limit** option accepts non-negative integer values (natural numbers). Where the value zero (0) means that it has no limits (default behavior).
 
 ---
 
@@ -168,6 +193,6 @@ The **ObjectStateHistory** provides the following:
 
 ## License
 
-The ObjectStateHistory class is open source software licensed under the MIT License.
+The ObjectStateHistory is open source software licensed under the MIT License.
 
 [MIT](https://choosealicense.com/licenses/mit/)

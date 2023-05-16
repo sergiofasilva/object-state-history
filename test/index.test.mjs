@@ -91,6 +91,81 @@ describe('ObjectStateHistory constructor', function () {
   })
 })
 
+describe('ObjectStateHistory options', function () {
+  it('Should return an error when provided options argument is not object, undefined or null.', () => {
+    assert.throws(() => {
+      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, 'text')
+      console.error('This should not print: ', objHist)
+    }, Error)
+    assert.throws(() => {
+      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, 3)
+      console.error('This should not print: ', objHist)
+    }, Error)
+    assert.throws(() => {
+      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, [])
+      console.error('This should not print: ', objHist)
+    }, Error)
+  })
+
+  it('Should not return an error when provided options argument is empty, undefined, null, or object.', () => {
+    assert.ok(new ObjectStateHistory({ a: '1', b: '2' }))
+    assert.ok(new ObjectStateHistory({ a: '1', b: '2' }, undefined))
+    assert.ok(new ObjectStateHistory({ a: '1', b: '2' }, null))
+    assert.ok(new ObjectStateHistory({ a: '1', b: '2' }, {}))
+  })
+})
+
+describe('ObjectStateHistory limit option', function () {
+  it('Should return an error when provided limit options is not an integer not negative.', () => {
+    assert.throws(() => {
+      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, { limit: 'text' })
+      console.error('This should not print: ', objHist)
+    }, Error)
+    assert.throws(() => {
+      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, { limit: -5 })
+      console.error('This should not print: ', objHist)
+    }, Error)
+    assert.throws(() => {
+      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, { limit: 5.4 })
+      console.error('This should not print: ', objHist)
+    }, Error)
+    assert.throws(() => {
+      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, { limit: {} })
+      console.error('This should not print: ', objHist)
+    }, Error)
+    assert.throws(() => {
+      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, { limit: [] })
+      console.error('This should not print: ', objHist)
+    }, Error)
+  })
+
+  it('Should not return an error when the options provided do not include the limit property.', () => {
+    assert.ok(new ObjectStateHistory({ a: '1', b: '2' }, { noLimitProperty: 2 }))
+  })
+
+  it('Should have undefined options when the options are not provided.', () => {
+    const objHistoryData = { a: '1', b: '2' }
+    const objHist = new ObjectStateHistory(objHistoryData)
+    const info = objHist.info()
+    strictEqual(info.options.limit, undefined)
+  })
+
+  it('Should have a limit option equal to zero (0) when the options provided not include the limit property.', () => {
+    const objHistoryData = { a: '1', b: '2' }
+    const objHist = new ObjectStateHistory(objHistoryData, { noLimitProperty: 2 })
+    const info = objHist.info()
+    strictEqual(info.options.limit, 0)
+  })
+
+  it('Should have a limit option equal to the options limit property.', () => {
+    const objHistoryData = { a: '1', b: '2' }
+    const limit = 3
+    const objHist = new ObjectStateHistory(objHistoryData, { limit })
+    const info = objHist.info()
+    strictEqual(info.options.limit, limit)
+  })
+})
+
 describe('ObjectStateHistory merge method', function () {
   it('Should return an error when no parameter is passed to it.', () => {
     const originalObjectData = { a: '1', b: '2' }
@@ -297,6 +372,73 @@ describe('ObjectStateHistory list method', function () {
     delete objHist.z
     const list = objHist.list()
     strictEqual(list.length, 2)
+  })
+
+  it('Should limit the list size to limit option and last value should reflect last change.', () => {
+    const limit = 3
+    const nrChanges = limit + 5
+    const originalObjectData = { a: '1', b: '2' }
+    const options = { limit }
+    const objHist = new ObjectStateHistory(originalObjectData, options)
+    for (let i = 0; i <= nrChanges; i++) {
+      objHist.c = i
+    }
+    const list = objHist.list()
+    strictEqual(list.length, limit)
+    deepStrictEqual(objHist.value, { ...originalObjectData, c: nrChanges })
+    deepStrictEqual(objHist.value, { ...originalObjectData, c: nrChanges })
+  })
+
+  it('Should not limit the list size when limit option is zero (0).', () => {
+    const limit = 0
+    const nrChanges = limit + 5
+    const originalObjectData = { a: '1', b: '2' }
+    const options = { limit }
+    const objHist = new ObjectStateHistory(originalObjectData, options)
+    for (let i = 0; i < nrChanges; i++) {
+      objHist.c = i
+    }
+    const list = objHist.list()
+    strictEqual(list.length, nrChanges + 1)
+  })
+})
+
+describe('ObjectStatHistory info method.', () => {
+  it('Should have the keys "options", "list" and "value".', () => {
+    const originalObjectData = { a: '1', b: '2' }
+    const objHist = new ObjectStateHistory(originalObjectData)
+    const info = objHist.info()
+
+    assert.ok(
+      ['options', 'list', 'value'].every((el) =>
+        Object.keys(info).includes(el)
+      )
+    )
+  })
+  it('It should return an object where the value property is equal to the value of the Object.', () => {
+    const limit = 3
+    const nrChanges = limit + 5
+    const originalObjectData = { a: '1', b: '2' }
+    const options = { limit }
+    const objHist = new ObjectStateHistory(originalObjectData, options)
+    for (let i = 0; i < nrChanges; i++) {
+      objHist.c = i
+    }
+    const info = objHist.info()
+    deepStrictEqual(objHist.value, info.value)
+  })
+
+  it('It should return an object where the list property is equal to the list returned by list method.', () => {
+    const limit = 3
+    const nrChanges = limit + 5
+    const originalObjectData = { a: '1', b: '2' }
+    const options = { limit }
+    const objHist = new ObjectStateHistory(originalObjectData, options)
+    for (let i = 0; i < nrChanges; i++) {
+      objHist.c = i
+    }
+    const info = objHist.info()
+    deepStrictEqual(objHist.list(), info.list)
   })
 })
 
