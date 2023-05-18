@@ -3,7 +3,7 @@ import ObjectStateHistory from '../index.mjs'
 import { describe, it } from 'node:test'
 import assert, { deepStrictEqual, strictEqual } from 'node:assert/strict'
 
-describe('ObjectStateHistory constructor', function () {
+describe('ObjectStateHistory constructor.', function () {
   it('Should return an error when no object is passed to it.', () => {
     assert.throws(() => {
       const objHist = new ObjectStateHistory([])
@@ -91,7 +91,7 @@ describe('ObjectStateHistory constructor', function () {
   })
 })
 
-describe('ObjectStateHistory options', function () {
+describe('ObjectStateHistory options.', function () {
   it('Should return an error when provided options argument is not object, undefined or null.', () => {
     assert.throws(() => {
       const objHist = new ObjectStateHistory({ a: '1', b: '2' }, 'text')
@@ -113,9 +113,16 @@ describe('ObjectStateHistory options', function () {
     assert.ok(new ObjectStateHistory({ a: '1', b: '2' }, null))
     assert.ok(new ObjectStateHistory({ a: '1', b: '2' }, {}))
   })
+
+  it('Should return an empty object when the options are not provided.', () => {
+    const objHistoryData = { a: '1', b: '2' }
+    const objHist = new ObjectStateHistory(objHistoryData)
+    const info = objHist.info()
+    deepStrictEqual(info.options, {})
+  })
 })
 
-describe('ObjectStateHistory limit option', function () {
+describe('ObjectStateHistory limit option.', function () {
   it('Should return an error when provided limit options is not an integer not negative.', () => {
     assert.throws(() => {
       const objHist = new ObjectStateHistory({ a: '1', b: '2' }, { limit: 'text' })
@@ -141,13 +148,6 @@ describe('ObjectStateHistory limit option', function () {
 
   it('Should not return an error when the options provided do not include the limit property.', () => {
     assert.ok(new ObjectStateHistory({ a: '1', b: '2' }, { noLimitProperty: 2 }))
-  })
-
-  it('Should have undefined options when the options are not provided.', () => {
-    const objHistoryData = { a: '1', b: '2' }
-    const objHist = new ObjectStateHistory(objHistoryData)
-    const info = objHist.info()
-    strictEqual(info.options.limit, undefined)
   })
 
   it('Should have a limit option equal to zero (0) when the options provided not include the limit property.', () => {
@@ -358,16 +358,23 @@ describe('ObjectStateHistory list method', function () {
 
   it('Should increment the lenght after delete an existent property.', () => {
     const originalObjectData = { a: '1', b: '2' }
-
     const objHist = new ObjectStateHistory(originalObjectData)
     delete objHist.b
     const list = objHist.list()
     strictEqual(list.length, 2)
   })
 
+  it('Should the last item value be equal to the object value property.', () => {
+    const originalObjectData = { a: '1', b: '2' }
+    const objHist = new ObjectStateHistory(originalObjectData)
+    objHist.c = '3'
+    objHist.d = '4'
+    const list = objHist.list()
+    deepStrictEqual(list.at(-1).value, objHist.value)
+  })
+
   it('Should increment the lenght after delete an inexistent property.', () => {
     const originalObjectData = { a: '1', b: '2' }
-
     const objHist = new ObjectStateHistory(originalObjectData)
     delete objHist.z
     const list = objHist.list()
@@ -415,7 +422,15 @@ describe('ObjectStatHistory info method.', () => {
       )
     )
   })
-  it('It should return an object where the value property is equal to the value of the Object.', () => {
+
+  it('Shoul return an object where the options porperty is an object.', () => {
+    const originalObjectData = { a: '1', b: '2' }
+    const objHist = new ObjectStateHistory(originalObjectData)
+    const info = objHist.info()
+    assert.ok(info.options.constructor === Object)
+  })
+
+  it('Should return an object where the value property is equal to the value of the Object.', () => {
     const limit = 3
     const nrChanges = limit + 5
     const originalObjectData = { a: '1', b: '2' }
@@ -428,7 +443,7 @@ describe('ObjectStatHistory info method.', () => {
     deepStrictEqual(objHist.value, info.value)
   })
 
-  it('It should return an object where the list property is equal to the list returned by list method.', () => {
+  it('Should return an object where the list property is equal to the list returned by list method.', () => {
     const limit = 3
     const nrChanges = limit + 5
     const originalObjectData = { a: '1', b: '2' }
@@ -442,7 +457,7 @@ describe('ObjectStatHistory info method.', () => {
   })
 })
 
-describe('ObjectStateHistory at method', function () {
+describe('ObjectStateHistory at method.', function () {
   it('Should return an error when try change the imuttable value.', () => {
     const objHistoryData = { a: '1', b: '2' }
     const objHist = new ObjectStateHistory(objHistoryData)
@@ -472,22 +487,24 @@ describe('ObjectStateHistory at method', function () {
     strictEqual(value2, undefined)
   })
 
-  it('Should return the object value when called without arguments.', () => {
+  it('Should return the object value (last value) when called without arguments.', () => {
     const originalObjectData = { a: '1', b: '2' }
     const objHist = new ObjectStateHistory(originalObjectData)
     objHist.c = '3'
     const value = objHist.at()
     deepStrictEqual(value, objHist.value)
     deepStrictEqual(value, { a: '1', b: '2', c: '3' })
+    deepStrictEqual(value, objHist.list().at(-1).value)
   })
 
-  it('Should return the object value when called with -1.', () => {
+  it('Should return the object value (last value) when called with -1.', () => {
     const originalObjectData = { a: '1', b: '2' }
     const objHist = new ObjectStateHistory(originalObjectData)
     objHist.c = '3'
     const valueMinusOne = objHist.at(-1)
     deepStrictEqual(valueMinusOne, objHist.value)
     deepStrictEqual(valueMinusOne, { a: '1', b: '2', c: '3' })
+    deepStrictEqual(valueMinusOne, objHist.list().at(-1).value)
   })
 
   it('Should return the object value corresponding to argument index.', () => {
@@ -505,6 +522,9 @@ describe('ObjectStateHistory at method', function () {
     const valueTwo = objHist.at(2)
     deepStrictEqual(valueTwo, { a: '1', b: '2', c: '3', d: '4' })
 
+    const valueMinusTwo = objHist.at(-2)
+    deepStrictEqual(valueMinusTwo, objHist.list().at(-2).value)
+
     const valueMinusOne = objHist.at(-1)
     const valueNoarguments = objHist.at()
     deepStrictEqual(valueMinusOne, { a: '1', b: '2', c: '3', d: '4' })
@@ -514,7 +534,7 @@ describe('ObjectStateHistory at method', function () {
   })
 })
 
-describe('ObjectStateHistory replace method', function () {
+describe('ObjectStateHistory replace method.', function () {
   it('Should return an error when no parameter is passed to it.', () => {
     const originalObjectData = { a: '1', b: '2' }
     const objHist = new ObjectStateHistory(originalObjectData)

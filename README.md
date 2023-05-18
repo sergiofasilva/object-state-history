@@ -52,7 +52,8 @@ const ObjectStateHistory = require('object-state-history')
 Once imported, create a new instance of ObjectStateHistory by passing an object to the constructor like:
 
 ```javascript
-const objHistory = new ObjectStateHistory({ prop1: 'value1', prop2: 'value2' })
+const theObject = { prop1: 'value1', prop2: 'value2' }
+const objHistory = new ObjectStateHistory(theObject)
 ```
 
 Once created, you can make changes to the object directly as usual, but they will be tracked automatically by ObjectStateHistory:
@@ -74,7 +75,7 @@ You can also get a list of all states and changes made to the object using the l
 console.log(objHistory.list())
 ```
 
-And you can retrieve a merged version of the object that reflects all changes up to a specific index in the history by calling the at() method with an index parameter:
+And you can retrieve the state of the object at the given index in the history by calling the at() method with an index parameter:
 
 ```javascript
 console.log(objHistory.at(0))
@@ -111,16 +112,11 @@ delete objHistory.a // { b: 5 }
 const currentState = objHistory.value // { b: 5 }
 
 // Get a specific state of the object by index
-// Assumes index -1, if no argument is passed, which corresponds to the last item.
 const stateAtIndex = objHistory.at(0) // { a: 1, b: 2 }
 
 // Get a list of all states and the changes of the object
 const stateList = objHistory.list()
 ```
-
-&nbsp;
-
----
 
 &nbsp;
 
@@ -130,45 +126,63 @@ The **ObjectStateHistory** provides the following:
 
 &nbsp;
 
-## Constructor
+### Constructor
 
-**new ObjectStateHistory(object)**: creates a new instance of ObjectStateHistory with the initial value of object.
+#### new ObjectStateHistory(object, options)
 
-&nbsp;
-
-## Properties
-
-**value**: returns the current state of the object.
+Creates a new instance of ObjectStateHistory with the initial value of object.
 
 &nbsp;
 
-## Methods
+### Properties
 
-**at(index)**: returns the state of the object at the given index, allowing for positive and negative integers. Negative integers count back from the last item in the array. Assumes index -1, if no argument is passed, which corresponds to the last item.
+#### value
 
-**info()**: returns an object with the properties: options, list and value.
-
-- _options_: an object with the options assumed by ObjectStateHistory;
-- _list_: same as the **list()** method;
-- _value_: same as the **valueOf()** method or the **value** property.
-
-**list()**: returns a list of all the states of the object with the history of changes.
-
-**merge(data)**: merges the provided data into the current state of the object.
-
-**replace(data)**: replaces the current state of the object with the provided data.
-
-**toString()**: returns a JSON string representation of the current state of the object.
-
-**valueOf()**: returns the same as the property **value**.
+Returns the current state of the object.
 
 &nbsp;
 
-## Options
+### Methods
 
-If you use very **large objects** and / or make **many changes** to objects, this can result in the ObjectStateHistory taking up a **lot of memory**. If this is a problem for you or if you don't need to have a very large history, it is possible to limit the number of changes stored in history.
+#### at(index)
 
-In the constructor you can send as a second parameter an object with the options:
+Returns the state of the object at the given index, allowing for positive and negative integers. Negative integers count back from the last item in the list history. Assumes index -1, if no argument is passed, which corresponds to the last item.
+
+#### info()
+
+Returns an object with the properties: options, list and value.
+
+- **options**: an object with the options assumed by ObjectStateHistory;
+- **list**: same as the **list()** method;
+- **value**: same as the **valueOf()** method or the **value** property.
+
+#### list()
+
+Returns a list of all the states of the object with the history of changes.
+
+#### merge(data)
+
+Merges the provided data into the current state of the object.
+
+#### replace(data)
+
+Replaces the current state of the object with the provided data.
+
+#### toString()
+
+Returns a JSON string representation of the current state of the object.
+
+#### valueOf()
+
+Returns the same as the property **value**.
+
+&nbsp;
+
+# Options
+
+If you use very **large objects** and/or make **many changes** to objects, this can result in the ObjectStateHistory taking up a **lot of memory**. If this is a problem for you or if you don't need to have a very large history, it is possible to limit the number of changes stored in the list history.
+
+In the constructor you can send as a second parameter an object with the options. Currently, the only option available is the **limit**, but in the future there may be other options.
 
 ```javascript
 const options = {
@@ -179,11 +193,7 @@ const obj = { a: 1, b: 2 }
 const objHistory = new ObjectStateHistory(obj, options)
 ```
 
-At the moment the only option available is **limit**, but in the future there may be more.
-
 The **limit** option accepts non-negative integer values (natural numbers). Where the value zero (0) means that it has no limits (default behavior).
-
----
 
 ## Authors
 
