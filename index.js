@@ -7,7 +7,7 @@ const OPERATIONS = Object.freeze({
 })
 
 class ObjectStateHistory {
-  #list = []
+  #list// = []
   #options = {}
   constructor (object, options) {
     const isValidArgument = arguments.length === 0 || object?.constructor === Object
@@ -19,6 +19,33 @@ class ObjectStateHistory {
     this.#setOptions(options)
     const obj = structuredClone(object || {})
 
+    console.log('OPTIONS:', this.#options)
+    if (this.#options.cache) {
+      const client = this.#options.cache.client
+      const key = this.#options.cache.key
+      client.set(key, [])
+      console.log('PROXY LIST .......')
+      this.#list = new Proxy(client.get(key), {
+        get: (target, prop) => {
+          // console.log('get', target, prop)
+          // target = client.get(key)
+          // console.log('TARGET:', target)
+          const value = target[prop]
+          console.log('VALUE:', value, prop)
+          if (value instanceof Function) {
+            return function (...args) {
+              const res = value.apply(target, args)
+              if (prop === 'push') {
+                console.log('TARGET.....', target)
+              }
+              client.set(key, target)
+              return res
+            }
+          }
+          return prop
+        }
+      })
+    }
     this.#merge(obj)
 
     return new Proxy(this, {
@@ -94,7 +121,8 @@ class ObjectStateHistory {
     }
 
     const schemaOptions = {
-      limit: value => isNaturalNumber(value)
+      limit: value => isNaturalNumber(value),
+      cache: value => isValidCache(value)
     }
     // schemaOptions.limit.required = false
 
@@ -118,6 +146,9 @@ class ObjectStateHistory {
     } else {
       this.#options = {
         limit: +options.limit || 0
+      }
+      if (options.cache) {
+        this.#options.cache = options.cache
       }
     }
   }
@@ -183,6 +214,38 @@ function isNaturalNumber (value) {
   const isNegative = value < 0
   const isNatural = isInteger && !isNegative
   return isNatural
+}
+
+function isValidCache (cache) {
+  if (cache === undefined || cache === null) {
+    return
+  }
+
+  if (cache.constructor !== Object) {
+    throw new Error('When provided, the cache option parameter must be of type object.')
+  }
+
+  if (!Object.keys(cache).includes('client')) {
+    throw new Error('When provided, the cache option parameter must include "client" propety.')
+  }
+
+  if (!Object.keys(cache).includes('key')) {
+    throw new Error('When provided, the cache option parameter must include "key" property.')
+  }
+
+  if (
+    !cache.client.get ||
+    !cache.client.set ||
+    typeof cache.client.get !== 'function' ||
+    typeof cache.client.set !== 'function'
+  ) {
+    throw new Error('When provided, the cache option parameter must have a valid cache client.')
+  }
+
+  if (!cache.key) {
+    throw new Error('When provided, the cache option parameter must have a valid key.')
+  }
+  return true
 }
 
 module.exports = ObjectStateHistory
