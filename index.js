@@ -7,7 +7,7 @@ const OPERATIONS = Object.freeze({
 })
 
 class ObjectStateHistory {
-  #list// = []
+  #list = []
   #options = {}
   constructor (object, options) {
     const isValidArgument = arguments.length === 0 || object?.constructor === Object
@@ -19,33 +19,22 @@ class ObjectStateHistory {
     this.#setOptions(options)
     const obj = structuredClone(object || {})
 
-    console.log('OPTIONS:', this.#options)
     if (this.#options.cache) {
       const client = this.#options.cache.client
       const key = this.#options.cache.key
-      client.set(key, [])
-      console.log('PROXY LIST .......')
-      this.#list = new Proxy(client.get(key), {
-        get: (target, prop) => {
-          // console.log('get', target, prop)
-          // target = client.get(key)
-          // console.log('TARGET:', target)
+      this.#list = new Proxy(this.#list, {
+        get (target, prop) {
           const value = target[prop]
-          console.log('VALUE:', value, prop)
-          if (value instanceof Function) {
-            return function (...args) {
-              const res = value.apply(target, args)
-              if (prop === 'push') {
-                console.log('TARGET.....', target)
-              }
-              client.set(key, target)
-              return res
-            }
+          const res = Reflect.get(...arguments)
+
+          if (['push'].includes(prop) && value instanceof Function) {
+            client.set(key, target)
           }
-          return prop
+          return res
         }
       })
     }
+
     this.#merge(obj)
 
     return new Proxy(this, {
@@ -161,7 +150,7 @@ class ObjectStateHistory {
     newItem.value = lastItem
     this.#list.push(newItem)
     if (this.#options?.limit) {
-      this.#list = this.#list.slice(-this.#options.limit)
+      this.#list.splice(0, this.#list.length - this.#options.limit)
     }
     this.#buildObjectRepresentation()
   }
@@ -191,7 +180,7 @@ class ObjectStateHistory {
   }
 
   static #getFreezedClonedObject (obj) {
-    return Object.freeze(structuredClone(obj))
+    return Object.freeze(obj)
   }
 }
 
