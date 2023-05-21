@@ -76,12 +76,26 @@ class ObjectStateHistory {
     return ObjectStateHistory.#getFreezedClonedObject(itemAtIndex?.value)
   }
 
+  get () {
+    if (!this.#options.cache) {
+      throw new Error('No cache.')
+    }
+    const client = this.#options.cache.client
+    const key = this.#options.cache.key
+
+    return client.get(key)
+  }
+
   merge (data) {
     return this.#merge(data)
   }
 
   replace (data) {
     return this.#merge(data, OPERATIONS.replace)
+  }
+
+  setList (list) {
+    this.#list.push(list)
   }
 
   list () {
