@@ -4,7 +4,7 @@ import { describe, it } from 'node:test'
 import assert, { deepStrictEqual, strictEqual } from 'node:assert/strict'
 
 describe('ObjectStateHistory constructor.', function () {
-  it('Should return an error when no object is passed to it.', () => {
+  it('Should return an error when no object, not undefined or not null is passed to it.', () => {
     assert.throws(() => {
       const objHist = new ObjectStateHistory([])
       console.error('This should not print: ', objHist)
@@ -21,11 +21,12 @@ describe('ObjectStateHistory constructor.', function () {
       const objHist = new ObjectStateHistory(new Set())
       console.error('This should not print: ', objHist)
     }, Error)
-    assert.throws(() => {
-      let undefinedVar
-      const objHist = new ObjectStateHistory(undefinedVar)
-      console.error('This should not print: ', objHist)
-    }, Error)
+  })
+
+  it('Should not return an error when empty, undefined ou null is passed to it.', () => {
+    assert.ok(new ObjectStateHistory())
+    assert.ok(new ObjectStateHistory(undefined))
+    assert.ok(new ObjectStateHistory(null))
   })
 
   it('Should return an error when try change the imuttable value.', () => {

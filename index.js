@@ -10,7 +10,7 @@ class ObjectStateHistory {
   #list = []
   #options = {}
   constructor (object, options) {
-    const isValidArgument = arguments.length === 0 || object?.constructor === Object
+    const isValidArgument = object === undefined || object === null || object?.constructor === Object
 
     if (!isValidArgument) {
       throw new Error('Should be provided an argument of type object.')
@@ -22,6 +22,7 @@ class ObjectStateHistory {
     if (this.#options.cache) {
       const client = this.#options.cache.client
       const key = this.#options.cache.key
+      this.#list = client.get(key) || []
       this.#list = new Proxy(this.#list, {
         get (target, prop) {
           const value = target[prop]
@@ -30,11 +31,13 @@ class ObjectStateHistory {
           if (['push'].includes(prop) && value instanceof Function) {
             client.set(key, target)
           }
+
           return res
         }
       })
-    }
 
+      // return client.get(key)
+    }
     this.#merge(obj)
 
     return new Proxy(this, {
@@ -74,16 +77,6 @@ class ObjectStateHistory {
     const itemAtIndex = this.#list[idx]
 
     return ObjectStateHistory.#getFreezedClonedObject(itemAtIndex?.value)
-  }
-
-  get () {
-    if (!this.#options.cache) {
-      throw new Error('No cache.')
-    }
-    const client = this.#options.cache.client
-    const key = this.#options.cache.key
-
-    return client.get(key)
   }
 
   merge (data) {
@@ -194,7 +187,10 @@ class ObjectStateHistory {
   }
 
   static #getFreezedClonedObject (obj) {
-    return Object.freeze(obj)
+    const isObject = obj?.constructor === Object
+    const isArray = Array.isArray(obj)
+    const clone = isObject ? structuredClone(obj) : isArray ? [...obj] : obj
+    return Object.freeze(clone)
   }
 }
 

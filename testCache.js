@@ -13,6 +13,7 @@ const objHist = new ObjectStateHistory(originalObjectData, options)
 
 // console.log('MAP VALUE0:', cacheClient.get('uniqueKey'))
 objHist.c = '3'
+
 // console.log('MAP VALUE1:', cacheClient.get('uniqueKey'))
 objHist.merge({ d: '4' })
 // console.log('MAP VALUE2:', cacheClient.get('uniqueKey'))
@@ -23,6 +24,7 @@ objHist.replace({ e: '5' })
 
 // const info = objHist.info()
 const list = objHist.list()
+
 // const value = objHist.value
 // const valueOf = objHist.valueOf()
 const valueAt = objHist.at()
@@ -34,3 +36,8 @@ console.log('LIST:', list)
 console.log('VALUE_AT:', valueAt)
 console.log('MAP KEYS', Array.from(cacheClient.keys()))
 console.log('MAP VALUE:', cacheClient.get('uniqueKey'))
+
+console.log('---------- ')
+const objCache = new ObjectStateHistory(undefined, options)
+objHist.f = '6'
+console.log('objCache:', objCache.list())
