@@ -20,23 +20,7 @@ class ObjectStateHistory {
     const obj = structuredClone(object || {})
 
     if (this.#options.cache) {
-      const client = this.#options.cache.client
-      const key = this.#options.cache.key
-      this.#list = client.get(key) || []
-      this.#list = new Proxy(this.#list, {
-        get (target, prop) {
-          const value = target[prop]
-          const res = Reflect.get(...arguments)
-
-          if (['push'].includes(prop) && value instanceof Function) {
-            client.set(key, target)
-          }
-
-          return res
-        }
-      })
-
-      // return client.get(key)
+      this.#setListToProxyCache()
     }
     this.#merge(obj)
 
@@ -87,10 +71,6 @@ class ObjectStateHistory {
     return this.#merge(data, OPERATIONS.replace)
   }
 
-  setList (list) {
-    this.#list.push(list)
-  }
-
   list () {
     return ObjectStateHistory.#getFreezedClonedObject(this.#list)
   }
@@ -105,6 +85,23 @@ class ObjectStateHistory {
 
   toString () {
     return JSON.stringify(this.value)
+  }
+
+  #setListToProxyCache () {
+    const client = this.#options.cache.client
+    const key = this.#options.cache.key
+    this.#list = new Proxy(client.get(key) || [], {
+      get (target, prop) {
+        const value = target[prop]
+        const res = Reflect.get(...arguments)
+
+        if (['push'].includes(prop) && value instanceof Function) {
+          client.set(key, target)
+        }
+
+        return res
+      }
+    })
   }
 
   #setOptions (options) {
@@ -189,7 +186,11 @@ class ObjectStateHistory {
   static #getFreezedClonedObject (obj) {
     const isObject = obj?.constructor === Object
     const isArray = Array.isArray(obj)
-    const clone = isObject ? structuredClone(obj) : isArray ? [...obj] : obj
+    const clone = isObject
+      ? structuredClone(obj)
+      : isArray
+        ? JSON.parse(JSON.stringify(obj))
+        : obj
     return Object.freeze(clone)
   }
 }

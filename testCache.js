@@ -38,6 +38,6 @@ console.log('MAP KEYS', Array.from(cacheClient.keys()))
 console.log('MAP VALUE:', cacheClient.get('uniqueKey'))
 
 console.log('---------- ')
-const objCache = new ObjectStateHistory(undefined, options)
+const objCache = new ObjectStateHistory(null, options)
 objHist.f = '6'
 console.log('objCache:', objCache.list())
