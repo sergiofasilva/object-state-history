@@ -31,7 +31,7 @@ class ObjectStateHistory {
         object.#merge(obj)
         return true
       },
-      get: (target, prop) => {
+      get (target, prop) {
         const value = target[prop]
 
         if (value instanceof Function && prop !== 'constructor') {
