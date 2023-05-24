@@ -180,9 +180,11 @@ Returns the same as the property **value**.
 
 # Options
 
-If you use very **large objects** and/or make **many changes** to objects, this can result in the ObjectStateHistory taking up a **lot of memory**. If this is a problem for you or if you don't need to have a very large history, it is possible to limit the number of changes stored in the list history.
+In the constructor you can send as a second parameter an object with the options
 
-In the constructor you can send as a second parameter an object with the options. Currently, the only option available is the **limit**, but in the future there may be other options.
+## Limit
+
+If you use very **large objects** and/or make **many changes** to objects, this can result in the ObjectStateHistory taking up a **lot of memory**. If this is a problem for you or if you don't need to have a very large history, it is possible to limit the number of changes stored in the list history.
 
 ```javascript
 const options = {
@@ -194,6 +196,48 @@ const objHistory = new ObjectStateHistory(obj, options)
 ```
 
 The **limit** option accepts non-negative integer values (natural numbers). Where the value zero (0) means that it has no limits (default behavior).
+
+## Cache
+
+If you need to share the object between node instances, you can use the **cache** option.
+The cache option has two properties:
+
+- **client**: client of a caching system (Redis, Map).
+- **key**: unique key that identifies the object. E.g.: user:id:123
+
+The **client** must have the functions **get(key)** and **set(key, value)**. E.g. Redis, Map, etc.
+
+```javascript
+const cacheClient = new Map()
+
+const options = {
+  cache: {
+    client: cacheClient,
+    key: 'uniqueKey'
+  }
+}
+
+const obj = { a: '1', b: '2' }
+const objHistory = new ObjectStateHistory(obj, options)
+objHistory.c = '3'
+console.log(objHistory.value) // { a: '1', b: '2', c: '3' }
+
+// get the object from cache
+const objHistoryFromCache = new ObjectStateHistory(null, options)
+console.log(objHistoryFromCache) // { a: '1', b: '2', c: '3' }
+
+objHistoryFromCache.d = '4' //both references, objHistory and objHistoryFromCache, will be changed
+console.log(objHistory.value) // { a: '1', b: '2', c: '3', d: '4' }
+console.log(objHistoryFromCache.value) // { a: '1', b: '2', c: '3', d: '4' }
+
+// get the object from cache and merge the object from first parameter
+const objHistoryFromCacheWithMerge = new ObjectStateHistory({ e: '5' }, options)
+console.log(objHistory.value) // { a: '1', b: '2', c: '3', d: '4', e: '5' }
+console.log(objHistoryFromCache.value) // { a: '1', b: '2', c: '3', d: '4', e: '5' }
+console.log(objHistoryFromCacheWithMerge.value) // { a: '1', b: '2', c: '3', d: '4', e: '5' }
+```
+
+**Note**: in case of concurrency it is necessary to implement a lock mechanism, to guarantee the integrity of the object.
 
 ## Authors
 

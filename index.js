@@ -34,7 +34,7 @@ class ObjectStateHistory {
       get: (target, prop) => {
         const value = target[prop]
 
-        if (value instanceof Function) {
+        if (value instanceof Function && prop !== 'constructor') {
           return function (...args) {
             return value.apply(target, args)
           }
@@ -234,8 +234,6 @@ function isValidCache (cache) {
   }
 
   if (
-    !cache.client.get ||
-    !cache.client.set ||
     typeof cache.client.get !== 'function' ||
     typeof cache.client.set !== 'function'
   ) {

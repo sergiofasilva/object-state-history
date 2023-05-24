@@ -23,10 +23,21 @@ describe('ObjectStateHistory constructor.', function () {
     }, Error)
   })
 
+  it('Should return ObjectStateHistory as constructor name.', () => {
+    const objHist = new ObjectStateHistory()
+    assert.strictEqual(objHist.constructor.name, 'ObjectStateHistory')
+  })
+
   it('Should not return an error when empty, undefined ou null is passed to it.', () => {
     assert.ok(new ObjectStateHistory())
     assert.ok(new ObjectStateHistory(undefined))
     assert.ok(new ObjectStateHistory(null))
+  })
+
+  it('Should return an empty object when empty, undefined ou null is passed to it.', () => {
+    deepStrictEqual(new ObjectStateHistory().value, {})
+    deepStrictEqual(new ObjectStateHistory(undefined).value, {})
+    deepStrictEqual(new ObjectStateHistory(null).value, {})
   })
 
   it('Should return an error when try change the imuttable value.', () => {
@@ -72,13 +83,8 @@ describe('ObjectStateHistory constructor.', function () {
 
   it('Should not change the original argument when undefined.', () => {
     let undefinedVar
-    try {
-      const objHist = new ObjectStateHistory(undefinedVar)
-      console.error('This should not print: ', objHist)
-    } catch (error) {
-      assert(error instanceof Error)
-    }
-
+    const objHist = new ObjectStateHistory(undefinedVar)
+    deepStrictEqual(objHist.value, {})
     strictEqual(undefinedVar, undefined)
   })
 
@@ -580,5 +586,169 @@ describe('ObjectStateHistory replace method.', function () {
     const replaceObject = objHist.replace(replaceObjectData)
     deepStrictEqual(objHist.value, replaceObjectData)
     deepStrictEqual(replaceObject, replaceObjectData)
+  })
+})
+
+describe('ObjectStateHistory external cache.', function () {
+  it('Should return an error when cache is provided but is not Object constructor.', () => {
+    assert.throws(() => {
+      const options = {
+        cache: undefined
+      }
+      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, options)
+      console.error('This should not print: ', objHist)
+    }, Error)
+    assert.throws(() => {
+      const options = {
+        cache: 'text'
+      }
+      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, options)
+      console.error('This should not print: ', objHist)
+    }, Error)
+    assert.throws(() => {
+      const options = {
+        cache: 123
+      }
+      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, options)
+      console.error('This should not print: ', objHist)
+    }, Error)
+    assert.throws(() => {
+      const options = {
+        cache: []
+      }
+      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, options)
+      console.error('This should not print: ', objHist)
+    }, Error)
+  })
+
+  it('Should return an error when client cache is provided but the the get property is not a function.', () => {
+    assert.throws(() => {
+      const options = {
+        cache: { client: { get: 'text' }, key: 'uniqueKey' }
+      }
+      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, options)
+      console.error('This should not print: ', objHist)
+    }, Error)
+    assert.throws(() => {
+      const options = {
+        cache: { client: { get: 123 }, key: 'uniqueKey' }
+      }
+      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, options)
+      console.error('This should not print: ', objHist)
+    }, Error)
+  })
+
+  it('Should return an error when client cache is provided but the the set property is not a function.', () => {
+    assert.throws(() => {
+      const options = {
+        cache: { client: { set: 'text' }, key: 'uniqueKey' }
+      }
+      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, options)
+      console.error('This should not print: ', objHist)
+    }, Error)
+    assert.throws(() => {
+      const options = {
+        cache: { client: { set: 123 }, key: 'uniqueKey' }
+      }
+      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, options)
+      console.error('This should not print: ', objHist)
+    }, Error)
+  })
+
+  it('Should return an error when cache is provided but does not have client property.', () => {
+    assert.throws(() => {
+      const options = {
+        cache: { key: 'uniqueKey' }
+      }
+      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, options)
+      console.error('This should not print: ', objHist)
+    }, Error)
+  })
+
+  it('Should return an error when cache is provided but does not have key property.', () => {
+    assert.throws(() => {
+      const options = {
+        cache: { client: new Map() }
+      }
+      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, options)
+      console.error('This should not print: ', objHist)
+    }, Error)
+  })
+
+  it('Should return an error when cache is provided and the key property is an empty string, undefined or null.', () => {
+    assert.throws(() => {
+      const options = {
+        cache: { client: new Map(), key: '' }
+      }
+      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, options)
+      console.error('This should not print: ', objHist)
+    }, Error)
+    assert.throws(() => {
+      const options = {
+        cache: { client: new Map(), key: undefined }
+      }
+      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, options)
+      console.error('This should not print: ', objHist)
+    }, Error)
+    assert.throws(() => {
+      const options = {
+        cache: { client: new Map(), key: null }
+      }
+      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, options)
+      console.error('This should not print: ', objHist)
+    }, Error)
+  })
+
+  it('Should return the same value for list method and the value in external cache for the given key.', () => {
+    const cacheClient = new Map()
+    const originalObjectData = { a: '1', b: '2' }
+    const options = {
+      cache: {
+        client: cacheClient,
+        key: 'uniqueKey'
+      }
+    }
+    const objHist = new ObjectStateHistory(originalObjectData, options)
+    objHist.c = '3'
+    const cacheGet = cacheClient.get(options.cache.key)
+    assert.deepStrictEqual(cacheGet, objHist.list())
+  })
+
+  it('Should the changes made to a cached object be reflected in another object created with the same cache key', () => {
+    const cacheClient = new Map()
+    const originalObjectData = { a: '1', b: '2' }
+    const options = {
+      cache: {
+        client: cacheClient,
+        key: 'uniqueKey'
+      }
+    }
+    const objHist = new ObjectStateHistory(originalObjectData, options)
+    objHist.c = '3'
+
+    const objCache = new ObjectStateHistory(null, options)
+    objCache.d = '4'
+    deepStrictEqual(objCache.value, objHist.value)
+    deepStrictEqual(objCache.value, { a: '1', b: '2', c: '3', d: '4' })
+    deepStrictEqual(objHist.value, { a: '1', b: '2', c: '3', d: '4' })
+    strictEqual(objCache.list().length, objHist.list().length)
+  })
+
+  it('Should merge object sent int the constructor, when use cache from of a previously created object', () => {
+    const cacheClient = new Map()
+    const originalObjectData = { a: '1', b: '2' }
+    const options = {
+      cache: {
+        client: cacheClient,
+        key: 'uniqueKey'
+      }
+    }
+    const objHist = new ObjectStateHistory(originalObjectData, options)
+    const objCache = new ObjectStateHistory({ c: '3', d: '4' }, options)
+
+    deepStrictEqual(objCache.value, objHist.value)
+    deepStrictEqual(objCache.value, { a: '1', b: '2', c: '3', d: '4' })
+    deepStrictEqual(objHist.value, { a: '1', b: '2', c: '3', d: '4' })
+    strictEqual(objCache.list().length, objHist.list().length)
   })
 })
