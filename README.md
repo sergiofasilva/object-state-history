@@ -203,7 +203,7 @@ If you need to share the object across more than one node instance, you can use 
 The cache option has two properties:
 
 - **client**: client of a caching system (Redis, Map).
-- **key**: unique key that identifies the object. E.g.: user:id:123
+- **key**: unique key that identifies the object. E.g.: user_id_123
 
 The **client** must have the functions **get(key)** and **set(key, value)**. E.g. Redis, Map, etc.
 
