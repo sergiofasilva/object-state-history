@@ -180,7 +180,7 @@ Returns the same as the property **value**.
 
 # Options
 
-In the constructor you can send as a second parameter an object with the options
+In the constructor you can send as a second parameter an object with the **options**.
 
 ## Limit
 
@@ -199,13 +199,15 @@ The **limit** option accepts non-negative integer values (natural numbers). Wher
 
 ## Cache
 
-If you need to share the object between node instances, you can use the **cache** option.
+If you need to share the object across more than one node instance, you can use the **cache** option to save the historical data in an external cache.
 The cache option has two properties:
 
 - **client**: client of a caching system (Redis, Map).
 - **key**: unique key that identifies the object. E.g.: user:id:123
 
 The **client** must have the functions **get(key)** and **set(key, value)**. E.g. Redis, Map, etc.
+
+Example of cache usage:
 
 ```javascript
 const cacheClient = new Map()

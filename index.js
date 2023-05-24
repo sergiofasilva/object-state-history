@@ -1,5 +1,7 @@
 'use strict'
 
+const { isNaturalNumber, isValidCache } = require('./utils/validations')
+
 const OPERATIONS = Object.freeze({
   delete: 'delete',
   replace: 'replace',
@@ -136,13 +138,13 @@ class ObjectStateHistory {
 
     if (errors.length > 0) {
       throw new Error(errors[0])
-    } else {
-      this.#options = {
-        limit: +options.limit || 0
-      }
-      if (options.cache) {
-        this.#options.cache = options.cache
-      }
+    }
+
+    this.#options = {
+      limit: +options.limit || 0
+    }
+    if (options.cache) {
+      this.#options.cache = options.cache
     }
   }
 
@@ -205,45 +207,6 @@ function mergeItemToObject (object, itemToMerge) {
     return structuredClone(itemToMerge.data)
   }
   return { ...object, ...itemToMerge.data }
-}
-
-function isNaturalNumber (value) {
-  const isValidType = [Number, String].includes(value.constructor)
-  const number = isValidType && Number(value)
-  const isInteger = Number.isInteger(number)
-  const isNegative = value < 0
-  const isNatural = isInteger && !isNegative
-  return isNatural
-}
-
-function isValidCache (cache) {
-  if (cache === undefined || cache === null) {
-    return
-  }
-
-  if (cache.constructor !== Object) {
-    throw new Error('When provided, the cache option parameter must be of type object.')
-  }
-
-  if (!Object.keys(cache).includes('client')) {
-    throw new Error('When provided, the cache option parameter must include "client" propety.')
-  }
-
-  if (!Object.keys(cache).includes('key')) {
-    throw new Error('When provided, the cache option parameter must include "key" property.')
-  }
-
-  if (
-    typeof cache.client.get !== 'function' ||
-    typeof cache.client.set !== 'function'
-  ) {
-    throw new Error('When provided, the cache option parameter must have a valid cache client.')
-  }
-
-  if (!cache.key) {
-    throw new Error('When provided, the cache option parameter must have a valid key.')
-  }
-  return true
 }
 
 module.exports = ObjectStateHistory
