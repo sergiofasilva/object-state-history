@@ -7,9 +7,10 @@
   "type": "commonjs",
   "scripts": {
     "test": "npx standard && node --test",
-    "push": "npm version patch && git push && npm publish",
-    "push-minor": "npm version minor && git push && npm publish",
-    "push-major": "npm version major && git push && npm publish"
+    "push": "npm run build && npm version patch && git push && npm publish",
+    "push-minor": "npm run build && npm version minor && git push && npm publish",
+    "push-major": "npm run build && npm version major && git push && npm publish",
+    "build": "tsc --project tsconfig.json"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -36,7 +37,8 @@
   ],
   "devDependencies": {
     "object-state-history-main": "github:sergiofasilva/object-state-history#main",
-    "standard": "*"
+    "standard": "*",
+    "typescript": "^5.1.6"
   },
   "author": "Sérgio Silva <sergiofasilva@gmail.com>",
   "license": "MIT",

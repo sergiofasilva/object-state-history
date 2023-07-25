@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "noImplicitAny": true,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "allowJs": true,
+    "moduleResolution": "Node",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationDir": "types"
+  },
+  "files": ["index.js"],
+}
