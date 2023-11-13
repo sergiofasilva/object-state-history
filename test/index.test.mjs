@@ -101,24 +101,24 @@ describe('ObjectStateHistory constructor.', function () {
 describe('ObjectStateHistory options.', function () {
   it('Should return an error when provided options argument is not object, undefined or null.', () => {
     assert.throws(() => {
-      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, 'text')
+      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, null, 'text')
       console.error('This should not print: ', objHist)
     }, Error)
     assert.throws(() => {
-      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, 3)
+      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, null, 3)
       console.error('This should not print: ', objHist)
     }, Error)
     assert.throws(() => {
-      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, [])
+      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, null, [])
       console.error('This should not print: ', objHist)
     }, Error)
   })
 
   it('Should not return an error when provided options argument is empty, undefined, null, or object.', () => {
     assert.ok(new ObjectStateHistory({ a: '1', b: '2' }))
-    assert.ok(new ObjectStateHistory({ a: '1', b: '2' }, undefined))
-    assert.ok(new ObjectStateHistory({ a: '1', b: '2' }, null))
-    assert.ok(new ObjectStateHistory({ a: '1', b: '2' }, {}))
+    assert.ok(new ObjectStateHistory({ a: '1', b: '2' }, null, undefined))
+    assert.ok(new ObjectStateHistory({ a: '1', b: '2' }, null, null))
+    assert.ok(new ObjectStateHistory({ a: '1', b: '2' }, null, {}))
   })
 
   it('Should return an empty object when the options are not provided.', () => {
@@ -132,34 +132,34 @@ describe('ObjectStateHistory options.', function () {
 describe('ObjectStateHistory limit option.', function () {
   it('Should return an error when provided limit options is not an integer not negative.', () => {
     assert.throws(() => {
-      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, { limit: 'text' })
+      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, null, { limit: 'text' })
       console.error('This should not print: ', objHist)
     }, Error)
     assert.throws(() => {
-      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, { limit: -5 })
+      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, null, { limit: -5 })
       console.error('This should not print: ', objHist)
     }, Error)
     assert.throws(() => {
-      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, { limit: 5.4 })
+      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, null, { limit: 5.4 })
       console.error('This should not print: ', objHist)
     }, Error)
     assert.throws(() => {
-      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, { limit: {} })
+      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, null, { limit: {} })
       console.error('This should not print: ', objHist)
     }, Error)
     assert.throws(() => {
-      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, { limit: [] })
+      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, null, { limit: [] })
       console.error('This should not print: ', objHist)
     }, Error)
   })
 
   it('Should not return an error when the options provided do not include the limit property.', () => {
-    assert.ok(new ObjectStateHistory({ a: '1', b: '2' }, { noLimitProperty: 2 }))
+    assert.ok(new ObjectStateHistory({ a: '1', b: '2' }, null, { noLimitProperty: 2 }))
   })
 
   it('Should have a limit option equal to zero (0) when the options provided not include the limit property.', () => {
     const objHistoryData = { a: '1', b: '2' }
-    const objHist = new ObjectStateHistory(objHistoryData, { noLimitProperty: 2 })
+    const objHist = new ObjectStateHistory(objHistoryData, null, { noLimitProperty: 2 })
     const info = objHist.info()
     strictEqual(info.options.limit, 0)
   })
@@ -167,7 +167,7 @@ describe('ObjectStateHistory limit option.', function () {
   it('Should have a limit option equal to the options limit property.', () => {
     const objHistoryData = { a: '1', b: '2' }
     const limit = 3
-    const objHist = new ObjectStateHistory(objHistoryData, { limit })
+    const objHist = new ObjectStateHistory(objHistoryData, null, { limit })
     const info = objHist.info()
     strictEqual(info.options.limit, limit)
   })
@@ -393,7 +393,7 @@ describe('ObjectStateHistory list method', function () {
     const nrChanges = limit + 5
     const originalObjectData = { a: '1', b: '2' }
     const options = { limit }
-    const objHist = new ObjectStateHistory(originalObjectData, options)
+    const objHist = new ObjectStateHistory(originalObjectData, null, options)
     for (let i = 0; i <= nrChanges; i++) {
       objHist.c = i
     }
@@ -408,7 +408,7 @@ describe('ObjectStateHistory list method', function () {
     const nrChanges = limit + 5
     const originalObjectData = { a: '1', b: '2' }
     const options = { limit }
-    const objHist = new ObjectStateHistory(originalObjectData, options)
+    const objHist = new ObjectStateHistory(originalObjectData, null, options)
     for (let i = 0; i < nrChanges; i++) {
       objHist.c = i
     }
@@ -442,7 +442,7 @@ describe('ObjectStatHistory info method.', () => {
     const nrChanges = limit + 5
     const originalObjectData = { a: '1', b: '2' }
     const options = { limit }
-    const objHist = new ObjectStateHistory(originalObjectData, options)
+    const objHist = new ObjectStateHistory(originalObjectData, null, options)
     for (let i = 0; i < nrChanges; i++) {
       objHist.c = i
     }
@@ -455,7 +455,7 @@ describe('ObjectStatHistory info method.', () => {
     const nrChanges = limit + 5
     const originalObjectData = { a: '1', b: '2' }
     const options = { limit }
-    const objHist = new ObjectStateHistory(originalObjectData, options)
+    const objHist = new ObjectStateHistory(originalObjectData, null, options)
     for (let i = 0; i < nrChanges; i++) {
       objHist.c = i
     }
@@ -589,166 +589,31 @@ describe('ObjectStateHistory replace method.', function () {
   })
 })
 
-describe('ObjectStateHistory external cache.', function () {
-  it('Should return an error when cache is provided but is not Object constructor.', () => {
-    assert.throws(() => {
-      const options = {
-        cache: undefined
-      }
-      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, options)
-      console.error('This should not print: ', objHist)
-    }, Error)
-    assert.throws(() => {
-      const options = {
-        cache: 'text'
-      }
-      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, options)
-      console.error('This should not print: ', objHist)
-    }, Error)
-    assert.throws(() => {
-      const options = {
-        cache: 123
-      }
-      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, options)
-      console.error('This should not print: ', objHist)
-    }, Error)
-    assert.throws(() => {
-      const options = {
-        cache: []
-      }
-      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, options)
-      console.error('This should not print: ', objHist)
-    }, Error)
-  })
-
-  it('Should return an error when client cache is provided but the the get property is not a function.', () => {
-    assert.throws(() => {
-      const options = {
-        cache: { client: { get: 'text' }, key: 'uniqueKey' }
-      }
-      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, options)
-      console.error('This should not print: ', objHist)
-    }, Error)
-    assert.throws(() => {
-      const options = {
-        cache: { client: { get: 123 }, key: 'uniqueKey' }
-      }
-      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, options)
-      console.error('This should not print: ', objHist)
-    }, Error)
-  })
-
-  it('Should return an error when client cache is provided but the the set property is not a function.', () => {
-    assert.throws(() => {
-      const options = {
-        cache: { client: { set: 'text' }, key: 'uniqueKey' }
-      }
-      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, options)
-      console.error('This should not print: ', objHist)
-    }, Error)
-    assert.throws(() => {
-      const options = {
-        cache: { client: { set: 123 }, key: 'uniqueKey' }
-      }
-      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, options)
-      console.error('This should not print: ', objHist)
-    }, Error)
-  })
-
-  it('Should return an error when cache is provided but does not have client property.', () => {
-    assert.throws(() => {
-      const options = {
-        cache: { key: 'uniqueKey' }
-      }
-      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, options)
-      console.error('This should not print: ', objHist)
-    }, Error)
-  })
-
-  it('Should return an error when cache is provided but does not have key property.', () => {
-    assert.throws(() => {
-      const options = {
-        cache: { client: new Map() }
-      }
-      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, options)
-      console.error('This should not print: ', objHist)
-    }, Error)
-  })
-
-  it('Should return an error when cache is provided and the key property is an empty string, undefined or null.', () => {
-    assert.throws(() => {
-      const options = {
-        cache: { client: new Map(), key: '' }
-      }
-      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, options)
-      console.error('This should not print: ', objHist)
-    }, Error)
-    assert.throws(() => {
-      const options = {
-        cache: { client: new Map(), key: undefined }
-      }
-      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, options)
-      console.error('This should not print: ', objHist)
-    }, Error)
-    assert.throws(() => {
-      const options = {
-        cache: { client: new Map(), key: null }
-      }
-      const objHist = new ObjectStateHistory({ a: '1', b: '2' }, options)
-      console.error('This should not print: ', objHist)
-    }, Error)
-  })
-
-  it('Should return the same value for list method and the value in external cache for the given key.', () => {
-    const cacheClient = new Map()
+describe('ObjectStateHistory with history.', function () {
+  it('Should the the history data be aplied. Test starting with empty data.', () => {
     const originalObjectData = { a: '1', b: '2' }
-    const options = {
-      cache: {
-        client: cacheClient,
-        key: 'uniqueKey'
-      }
-    }
-    const objHist = new ObjectStateHistory(originalObjectData, options)
-    objHist.c = '3'
-    const cacheGet = cacheClient.get(options.cache.key)
-    assert.deepStrictEqual(cacheGet, objHist.list())
+
+    const objInitial = new ObjectStateHistory(originalObjectData)
+    objInitial.c = '3'
+
+    const history = objInitial.list()
+    const objWithHist = new ObjectStateHistory(null, history, null)
+    objWithHist.d = '4'
+    deepStrictEqual(objInitial.value, { a: '1', b: '2', c: '3' })
+    deepStrictEqual(objWithHist.value, { a: '1', b: '2', c: '3', d: '4' })
+    deepStrictEqual(objWithHist.list().length, 4)
   })
-
-  it('Should the changes made to a cached object be reflected in another object created with the same cache key', () => {
-    const cacheClient = new Map()
+  it('Should the the history data be aplied. Test starting with an object to merge with history.', () => {
     const originalObjectData = { a: '1', b: '2' }
-    const options = {
-      cache: {
-        client: cacheClient,
-        key: 'uniqueKey'
-      }
-    }
-    const objHist = new ObjectStateHistory(originalObjectData, options)
-    objHist.c = '3'
 
-    const objCache = new ObjectStateHistory(null, options)
-    objCache.d = '4'
-    deepStrictEqual(objCache.value, objHist.value)
-    deepStrictEqual(objCache.value, { a: '1', b: '2', c: '3', d: '4' })
-    deepStrictEqual(objHist.value, { a: '1', b: '2', c: '3', d: '4' })
-    strictEqual(objCache.list().length, objHist.list().length)
-  })
+    const objInitial = new ObjectStateHistory(originalObjectData)
+    objInitial.c = '3'
 
-  it('Should merge object sent int the constructor, when use cache from of a previously created object', () => {
-    const cacheClient = new Map()
-    const originalObjectData = { a: '1', b: '2' }
-    const options = {
-      cache: {
-        client: cacheClient,
-        key: 'uniqueKey'
-      }
-    }
-    const objHist = new ObjectStateHistory(originalObjectData, options)
-    const objCache = new ObjectStateHistory({ c: '3', d: '4' }, options)
-
-    deepStrictEqual(objCache.value, objHist.value)
-    deepStrictEqual(objCache.value, { a: '1', b: '2', c: '3', d: '4' })
-    deepStrictEqual(objHist.value, { a: '1', b: '2', c: '3', d: '4' })
-    strictEqual(objCache.list().length, objHist.list().length)
+    const history = objInitial.list()
+    const objWithHist = new ObjectStateHistory({ d: '4' }, history, null)
+    objWithHist.e = '5'
+    deepStrictEqual(objInitial.value, { a: '1', b: '2', c: '3' })
+    deepStrictEqual(objWithHist.value, { a: '1', b: '2', c: '3', d: '4', e: '5' })
+    deepStrictEqual(objWithHist.list().length, 4)
   })
 })

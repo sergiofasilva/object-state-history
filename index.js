@@ -1,6 +1,6 @@
 'use strict'
 
-const { isNaturalNumber, isValidCache } = require('./utils/validations')
+const { isNaturalNumber } = require('./utils/validations')
 
 const OPERATIONS = Object.freeze({
   delete: 'delete',
@@ -11,7 +11,7 @@ const OPERATIONS = Object.freeze({
 class ObjectStateHistory {
   #list = []
   #options = {}
-  constructor (object, options) {
+  constructor (object, history, options) {
     const isValidArgument = object === undefined || object === null || object?.constructor === Object
 
     if (!isValidArgument) {
@@ -21,8 +21,9 @@ class ObjectStateHistory {
     this.#setOptions(options)
     const obj = structuredClone(object || {})
 
-    if (this.#options.cache) {
-      this.#setListToProxyCache()
+    const hasHistory = history && Array.isArray(history) && history.length > 0
+    if (hasHistory) {
+      this.#list = Array.from(history)
     }
     this.#merge(obj)
 
@@ -89,23 +90,6 @@ class ObjectStateHistory {
     return JSON.stringify(this.value)
   }
 
-  #setListToProxyCache () {
-    const client = this.#options.cache.client
-    const key = this.#options.cache.key
-    this.#list = new Proxy(client.get(key) || [], {
-      get (target, prop) {
-        const value = target[prop]
-        const res = Reflect.get(...arguments)
-
-        if (['push'].includes(prop) && value instanceof Function) {
-          client.set(key, target)
-        }
-
-        return res
-      }
-    })
-  }
-
   #setOptions (options) {
     if (options === undefined || options === null) {
       return
@@ -116,8 +100,7 @@ class ObjectStateHistory {
     }
 
     const schemaOptions = {
-      limit: value => isNaturalNumber(value),
-      cache: value => isValidCache(value)
+      limit: value => isNaturalNumber(value)
     }
     // schemaOptions.limit.required = false
 
@@ -142,9 +125,6 @@ class ObjectStateHistory {
 
     this.#options = {
       limit: +options.limit || 0
-    }
-    if (options.cache) {
-      this.#options.cache = options.cache
     }
   }
 

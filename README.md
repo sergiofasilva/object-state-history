@@ -128,11 +128,25 @@ The **ObjectStateHistory** provides the following:
 
 ### Constructor
 
-#### new ObjectStateHistory(object, options)
+#### new ObjectStateHistory(object, history, options)
 
 Creates a new instance of ObjectStateHistory with the initial value of object.
 
 &nbsp;
+
+#### Parameters
+
+##### object
+
+The inicial object data.
+
+##### history
+
+The history of changes of the object. See <a href="#using-history">Using history</a> chapter.
+
+##### options
+
+The options of ObjectStateHistory. See <a href="#options">Options</a> chapter.
 
 ### Properties
 
@@ -192,54 +206,48 @@ const options = {
 }
 
 const obj = { a: 1, b: 2 }
-const objHistory = new ObjectStateHistory(obj, options)
+const objHistory = new ObjectStateHistory(obj, null, options)
 ```
 
 The **limit** option accepts non-negative integer values (natural numbers). Where the value zero (0) means that it has no limits (default behavior).
 
-## Cache
+# Using history
 
-If you need to share the object across more than one node instance, you can use the **cache** option to save the historical data in an external cache.
-The cache option has two properties:
+If you need to share the object across more than one node instance, you can use the **history** parameter.
 
-- **client**: client of a caching system (Redis, Map).
-- **key**: unique key that identifies the object. E.g.: user_id_123
-
-The **client** must have the functions **get(key)** and **set(key, value)**. E.g. Redis, Map, etc.
-
-Example of cache usage:
+Example of using history:
 
 ```javascript
-const cacheClient = new Map()
-
-const options = {
-  cache: {
-    client: cacheClient,
-    key: 'uniqueKey'
-  }
-}
-
 const obj = { a: '1', b: '2' }
-const objHistory = new ObjectStateHistory(obj, options)
-objHistory.c = '3'
-console.log(objHistory.value) // { a: '1', b: '2', c: '3' }
+const objInitial = new ObjectStateHistory(obj)
+objInitial.c = '3'
+console.log(objInitial.value) // { a: '1', b: '2', c: '3' }
 
-// get the object from cache
-const objHistoryFromCache = new ObjectStateHistory(null, options)
-console.log(objHistoryFromCache) // { a: '1', b: '2', c: '3' }
+// get the history from another object
+const history = objInitial.list()
+// using the history in a new object
+const objWithHistory = new ObjectStateHistory(null, history)
+console.log(objWithHistory) // { a: '1', b: '2', c: '3' }
 
-objHistoryFromCache.d = '4' //both references, objHistory and objHistoryFromCache, will be changed
-console.log(objHistory.value) // { a: '1', b: '2', c: '3', d: '4' }
-console.log(objHistoryFromCache.value) // { a: '1', b: '2', c: '3', d: '4' }
+objWithHistory.d = '4'
+console.log(objWithHistory.value) // { a: '1', b: '2', c: '3', d: '4' }
 
-// get the object from cache and merge the object from first parameter
-const objHistoryFromCacheWithMerge = new ObjectStateHistory({ e: '5' }, options)
-console.log(objHistory.value) // { a: '1', b: '2', c: '3', d: '4', e: '5' }
-console.log(objHistoryFromCache.value) // { a: '1', b: '2', c: '3', d: '4', e: '5' }
-console.log(objHistoryFromCacheWithMerge.value) // { a: '1', b: '2', c: '3', d: '4', e: '5' }
+// using the history in a new object and merge the object from first parameter
+const objWithHistoryAndMerge = new ObjectStateHistory({ e: '5' }, history)
+console.log(objInitial.value) // { a: '1', b: '2', c: '3' }
+console.log(objWithHistory.value) // { a: '1', b: '2', c: '3' }
+console.log(objWithHistoryAndMerge.value) // { a: '1', b: '2', c: '3', e: '5' }
 ```
 
-**Note**: in case of concurrency it is necessary to implement a lock mechanism, to guarantee the integrity of the object.
+## Notes
+
+### Shallow history
+
+Note that the history only works on the first level of the object, it's a Shallow history, i.e. it doesn't work with multi-level objects. Deep objects work like regular objects, i.e. by reference.
+
+### Version changes
+
+This version is not compatible with the previous one. The use of cache in the previous version had problems, so now it is not possible to use cache, instead it is recommended to use the **history** parameter. Please note that the constructor has changed, the **options** parameter is now the third parameter while in the second we have the **history** parameter.
 
 ## Authors
 

@@ -6,7 +6,7 @@
   "types": "./types/index.d.ts",
   "type": "commonjs",
   "scripts": {
-    "test": "npx standard && node --test",
+    "test": "npx standard && node --test --experimental-test-coverage",
     "push": "npm run build && npm version patch && git push && npm publish",
     "push-minor": "npm run build && npm version minor && git push && npm publish",
     "push-major": "npm run build && npm version major && git push && npm publish",
