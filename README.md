@@ -146,7 +146,7 @@ The history of changes of the object. See <a href="#using-history">Using history
 
 ##### options
 
-The options of ObjectStateHistory. See <a href="#options">Options</a> chapter.
+The options of ObjectStateHistory. See <a href="#options-1">Options</a> chapter.
 
 ### Properties
 
