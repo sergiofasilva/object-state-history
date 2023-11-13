@@ -6,7 +6,7 @@ declare class ObjectStateHistory {
         data: any;
     };
     static "__#1@#getFreezedClonedObject"(obj: any): any;
-    constructor(object: any, options: any);
+    constructor(object: any, history: any, options: any);
     get value(): any;
     valueOf(): any;
     at(index?: number): any;
