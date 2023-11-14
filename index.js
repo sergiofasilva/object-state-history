@@ -1,5 +1,8 @@
 'use strict'
 
+const EventEmitter = require('node:events')
+const util = require('node:util')
+
 const { isNaturalNumber } = require('./utils/validations')
 
 const OPERATIONS = Object.freeze({
@@ -8,10 +11,11 @@ const OPERATIONS = Object.freeze({
   merge: 'merge'
 })
 
-class ObjectStateHistory {
+class ObjectStateHistory extends EventEmitter {
   #list = []
   #options = {}
   constructor (object, history, options) {
+    super()
     const isValidArgument = object === undefined || object === null || object?.constructor === Object
 
     if (!isValidArgument) {
@@ -47,6 +51,9 @@ class ObjectStateHistory {
       deleteProperty (target, prop) {
         target.#merge(prop, OPERATIONS.delete)
         return true
+      },
+      ownKeys (target) {
+        return Reflect.ownKeys(target.value)
       }
     })
   }
@@ -84,6 +91,10 @@ class ObjectStateHistory {
       list: this.list(),
       value: this.value
     }
+  }
+
+  [util.inspect.custom] (depth, options, inspect) {
+    return `${this.constructor.name}: ${this.toString()}`
   }
 
   toString () {
@@ -135,6 +146,7 @@ class ObjectStateHistory {
 
     newItem.value = lastItem
     this.#list.push(newItem)
+    this.emit('change', newItem)
     if (this.#options?.limit) {
       this.#list.splice(0, this.#list.length - this.#options.limit)
     }

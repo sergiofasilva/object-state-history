@@ -69,13 +69,13 @@ To retrieve a snapshot of the object at any time, simply call the value getter:
 console.log(objHistory.value) // { prop2: 'value2', prop3: 'value3' }
 ```
 
-You can also get a list of all states and changes made to the object using the list() method:
+You can also get a list of all states and changes made to the object using the `list()` method:
 
 ```javascript
 console.log(objHistory.list())
 ```
 
-And you can retrieve the state of the object at the given index in the history by calling the at() method with an index parameter:
+And you can retrieve the state of the object at the given index in the history by calling the `at()` method with an index parameter:
 
 ```javascript
 console.log(objHistory.at(0))
@@ -160,15 +160,15 @@ Returns the current state of the object.
 
 #### at(index)
 
-Returns the state of the object at the given index, allowing for positive and negative integers. Negative integers count back from the last item in the list history. Assumes index -1, if no argument is passed, which corresponds to the last item.
+Returns the state of the object at the given index, allowing for positive and negative integers. Negative integers count back from the last item in the list history. Assumes **index -1**, if no argument is passed, which corresponds to the last item.
 
 #### info()
 
-Returns an object with the properties: options, list and value.
+Returns an object with the properties: **options**, **list** and **value**.
 
 - **options**: an object with the options assumed by ObjectStateHistory;
-- **list**: same as the **list()** method;
-- **value**: same as the **valueOf()** method or the **value** property.
+- **list**: same as the `list()` method;
+- **value**: same as the `valueOf()` method or the `value` property.
 
 #### list()
 
@@ -188,13 +188,69 @@ Returns a JSON string representation of the current state of the object.
 
 #### valueOf()
 
-Returns the same as the property **value**.
+Returns the same as the property `value`.
+
+&nbsp;
+
+### Events
+
+#### change
+
+Event triggered whenever changes are made to the object. The changed information is passed as a callback parameter.
+It can be useful, for example, to save the last state of the object in an external cache system whenever there are changes.
+
+```javascript
+const objHist = new ObjectStateHistory({ a: '1', b: '2' }) // initial object
+// item is an object with the changed data
+objHist.on('change', function (item) {
+  console.log(item.data) // { c: '3' }), the changed data
+  console.log(this.value) // { a: '1', b: '2', c: '3' }), the current state of the object
+  console.log(this.at(0)) // { a: '1', b: '2' }), the state of the object at index 0
+  console.log(this.list().length) // 2
+})
+
+objHist.c = '3' // trigger change event
+```
+
+&nbsp;
+
+# Using history
+
+If you need to share the object across more than one node instance, you can use the **history** parameter to create an object with a list containing the history of previous changes.
+
+You can save the change history whenever changes are detected in the change event. See <a href="#events">Events</a> chapter.
+
+Example of using history:
+
+```javascript
+const obj = { a: '1', b: '2' }
+const objInitial = new ObjectStateHistory(obj)
+objInitial.c = '3'
+console.log(objInitial.value) // { a: '1', b: '2', c: '3' }
+
+// get the history of changes from another object
+const history = objInitial.list()
+// using the history in a new object
+const objWithHistory = new ObjectStateHistory(null, history)
+console.log(objWithHistory) // { a: '1', b: '2', c: '3' }
+
+objWithHistory.d = '4'
+console.log(objWithHistory.value) // { a: '1', b: '2', c: '3', d: '4' }
+
+// using the history in a new object and merge the object from first parameter
+const objWithHistoryAndMerge = new ObjectStateHistory({ e: '5' }, history)
+console.log(objInitial.value) // { a: '1', b: '2', c: '3' }
+console.log(objWithHistory.value) // { a: '1', b: '2', c: '3' }
+console.log(objWithHistoryAndMerge.value) // { a: '1', b: '2', c: '3', e: '5' }
+console.log(objWithHistory.list().length) // 4, includes the changes received in the history
+console.log(objWithHistoryAndMerge.list().length) // 3, includes the changes received in the history
+```
 
 &nbsp;
 
 # Options
 
-In the constructor you can send as a second parameter an object with the **options**.
+In the constructor you can send as a third parameter an object with the **options**.
 
 ## Limit
 
@@ -211,39 +267,13 @@ const objHistory = new ObjectStateHistory(obj, null, options)
 
 The **limit** option accepts non-negative integer values (natural numbers). Where the value zero (0) means that it has no limits (default behavior).
 
-# Using history
+&nbsp;
 
-If you need to share the object across more than one node instance, you can use the **history** parameter.
-
-Example of using history:
-
-```javascript
-const obj = { a: '1', b: '2' }
-const objInitial = new ObjectStateHistory(obj)
-objInitial.c = '3'
-console.log(objInitial.value) // { a: '1', b: '2', c: '3' }
-
-// get the history from another object
-const history = objInitial.list()
-// using the history in a new object
-const objWithHistory = new ObjectStateHistory(null, history)
-console.log(objWithHistory) // { a: '1', b: '2', c: '3' }
-
-objWithHistory.d = '4'
-console.log(objWithHistory.value) // { a: '1', b: '2', c: '3', d: '4' }
-
-// using the history in a new object and merge the object from first parameter
-const objWithHistoryAndMerge = new ObjectStateHistory({ e: '5' }, history)
-console.log(objInitial.value) // { a: '1', b: '2', c: '3' }
-console.log(objWithHistory.value) // { a: '1', b: '2', c: '3' }
-console.log(objWithHistoryAndMerge.value) // { a: '1', b: '2', c: '3', e: '5' }
-```
-
-## Notes
+# Notes
 
 ### Shallow history
 
-Note that the history only works on the first level of the object, it's a Shallow history, i.e. it doesn't work with multi-level objects. Deep objects work like regular objects, i.e. by reference.
+Note that the history only works on the first level of the object, it's a **shallow** history, i.e. it doesn't work with multi-level objects. Deep objects work like regular objects, i.e. by reference.
 
 ### Version changes
 

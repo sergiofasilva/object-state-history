@@ -2,6 +2,7 @@
 import ObjectStateHistory from '../index.mjs'
 import { describe, it } from 'node:test'
 import assert, { deepStrictEqual, strictEqual } from 'node:assert/strict'
+import { inspect } from 'node:util'
 
 describe('ObjectStateHistory constructor.', function () {
   it('Should return an error when no object, not undefined or not null is passed to it.', () => {
@@ -40,7 +41,7 @@ describe('ObjectStateHistory constructor.', function () {
     deepStrictEqual(new ObjectStateHistory(null).value, {})
   })
 
-  it('Should return an error when try change the imuttable value.', () => {
+  it('Should return an error when try change the immutable value.', () => {
     const objHistoryData = { a: '1', b: '2' }
     const objHist = new ObjectStateHistory(objHistoryData)
 
@@ -73,6 +74,22 @@ describe('ObjectStateHistory constructor.', function () {
     deepStrictEqual(objHist.toString(), JSON.stringify(objHist.value))
   })
 
+  it('Should return the value as JSON stringify when call the object with template literal.', () => {
+    const objHistoryData = { a: '1', b: '2' }
+    const objHist = new ObjectStateHistory(objHistoryData)
+
+    deepStrictEqual(objHist.value, objHistoryData)
+    deepStrictEqual(`${objHist}`, JSON.stringify(objHist.value))
+  })
+
+  it('Should return the value as JSON stringify when call the object with JSON.stringify.', () => {
+    const objHistoryData = { a: '1', b: '2' }
+    const objHist = new ObjectStateHistory(objHistoryData)
+
+    deepStrictEqual(objHist.value, objHistoryData)
+    deepStrictEqual(JSON.stringify(objHist), JSON.stringify(objHist.value))
+  })
+
   it('Should not change the original object.', () => {
     const objData = { a: '1', b: '2' }
     const objDataCopy = { ...objData }
@@ -95,6 +112,32 @@ describe('ObjectStateHistory constructor.', function () {
     objData.b = '3'
     assert.notEqual(objData, objDataCopy)
     deepStrictEqual(objHist.value, objDataCopy)
+  })
+})
+
+describe('ObjectStateHistory instance representation', function () {
+  it('Should return an array with all the keys of ObjectStateHistory value object when call Object.keys.', () => {
+    const objHist = new ObjectStateHistory({ a: '1', b: '2' })
+    objHist.c = '3'
+    deepStrictEqual(Object.keys(objHist), ['a', 'b', 'c'])
+  })
+
+  it('Should return an array with all the values of ObjectStateHistory value object when call Object.values.', () => {
+    const objHist = new ObjectStateHistory({ a: '1', b: '2' })
+    objHist.c = '3'
+    deepStrictEqual(Object.values(objHist), ['1', '2', '3'])
+  })
+
+  it('Should return an array with all the entries of ObjectStateHistory value object when call Object.entries.', () => {
+    const objHist = new ObjectStateHistory({ a: '1', b: '2' })
+    objHist.c = '3'
+    deepStrictEqual(Object.entries(objHist), [['a', '1'], ['b', '2'], ['c', '3']])
+  })
+
+  it('Should print the class name followed by last value when printing the object instance.', () => {
+    const objHist = new ObjectStateHistory({ a: '1', b: '2' })
+    objHist.c = '3'
+    deepStrictEqual(inspect(objHist), 'ObjectStateHistory: {"a":"1","b":"2","c":"3"}')
   })
 })
 
@@ -192,7 +235,7 @@ describe('ObjectStateHistory merge method', function () {
     }, Error)
   })
 
-  it('Should return an error when try change the imuttable value.', () => {
+  it('Should return an error when try change the immutable value.', () => {
     const objHistoryData = { a: '1', b: '2' }
     const objHist = new ObjectStateHistory(objHistoryData)
     const mergeObjHist = objHist.merge({ c: '3' })
@@ -297,7 +340,7 @@ describe('ObjectStateHistory delete operation', function () {
 })
 
 describe('ObjectStateHistory list method', function () {
-  it('Should return an error when try change the imuttable list.', () => {
+  it('Should return an error when try change the immutable list.', () => {
     const objHistoryData = { a: '1', b: '2' }
     const objHist = new ObjectStateHistory(objHistoryData)
     const list = objHist.list()
@@ -465,7 +508,7 @@ describe('ObjectStatHistory info method.', () => {
 })
 
 describe('ObjectStateHistory at method.', function () {
-  it('Should return an error when try change the imuttable value.', () => {
+  it('Should return an error when try change the immutable value.', () => {
     const objHistoryData = { a: '1', b: '2' }
     const objHist = new ObjectStateHistory(objHistoryData)
     const atObjHist = objHist.at()
@@ -560,7 +603,7 @@ describe('ObjectStateHistory replace method.', function () {
     }, Error)
   })
 
-  it('Should return an error when try change the imuttable value.', () => {
+  it('Should return an error when try change the immutable value.', () => {
     const objHistoryData = { a: '1', b: '2' }
     const objHist = new ObjectStateHistory(objHistoryData)
     const mergeObjHist = objHist.replace({ c: '3' })
@@ -590,7 +633,7 @@ describe('ObjectStateHistory replace method.', function () {
 })
 
 describe('ObjectStateHistory with history.', function () {
-  it('Should the the history data be aplied. Test starting with empty data.', () => {
+  it('Should the the history data be aplied. Test with empty data.', () => {
     const originalObjectData = { a: '1', b: '2' }
 
     const objInitial = new ObjectStateHistory(originalObjectData)
@@ -603,7 +646,7 @@ describe('ObjectStateHistory with history.', function () {
     deepStrictEqual(objWithHist.value, { a: '1', b: '2', c: '3', d: '4' })
     deepStrictEqual(objWithHist.list().length, 4)
   })
-  it('Should the the history data be aplied. Test starting with an object to merge with history.', () => {
+  it('Should the the history data be aplied. Test with an object to merge with history.', () => {
     const originalObjectData = { a: '1', b: '2' }
 
     const objInitial = new ObjectStateHistory(originalObjectData)
@@ -615,5 +658,18 @@ describe('ObjectStateHistory with history.', function () {
     deepStrictEqual(objInitial.value, { a: '1', b: '2', c: '3' })
     deepStrictEqual(objWithHist.value, { a: '1', b: '2', c: '3', d: '4', e: '5' })
     deepStrictEqual(objWithHist.list().length, 4)
+  })
+})
+
+describe('ObjectStateHistory instance events.', function () {
+  it('Should return changed data when on change event occurs.', () => {
+    const objHist = new ObjectStateHistory({ a: '1', b: '2' })
+    objHist.on('change', function (item) {
+      deepStrictEqual(item.data, { c: '3' })
+      deepStrictEqual(this.value, { a: '1', b: '2', c: '3' })
+      deepStrictEqual(this.at(0), { a: '1', b: '2' })
+      deepStrictEqual(this.list().length, 2)
+    })
+    objHist.c = '3'
   })
 })
