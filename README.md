@@ -252,7 +252,7 @@ console.log(objWithHistoryAndMerge.list().length) // 3, includes the changes rec
 
 In the constructor you can send as a third parameter an object with the **options**.
 
-## Limit
+### Limit
 
 If you use very **large objects** and/or make **many changes** to objects, this can result in the ObjectStateHistory taking up a **lot of memory**. If this is a problem for you or if you don't need to have a very large history, it is possible to limit the number of changes stored in the list history.
 
