@@ -1,9 +1,9 @@
 'use strict'
 
-const EventEmitter = require('node:events')
-const util = require('node:util')
+import EventEmitter from 'node:events'
+import util from 'node:util'
 
-const { isNaturalNumber } = require('./utils/validations')
+import { isNaturalNumber } from './utils/validations.js'
 
 const OPERATIONS = Object.freeze({
   delete: 'delete',
@@ -201,4 +201,6 @@ function mergeItemToObject (object, itemToMerge) {
   return { ...object, ...itemToMerge.data }
 }
 
-module.exports = ObjectStateHistory
+export default ObjectStateHistory
+
+export { ObjectStateHistory }

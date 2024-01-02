@@ -9,5 +9,5 @@
     "declaration": true,
     "declarationDir": "types"
   },
-  "files": ["index.js"],
+  "files": ["index.cjs"],
 }
