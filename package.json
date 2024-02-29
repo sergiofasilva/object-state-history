@@ -35,7 +35,7 @@
     "list"
   ],
   "devDependencies": {
-    "object-state-history-main": "github:sergiofasilva/object-state-history#main",
+    "object-state-history-main": "github:sergiofasilva/object-state-history#develop",
     "standard": "*",
     "typescript": "^5.1.6"
   },
