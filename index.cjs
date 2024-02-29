@@ -62,6 +62,10 @@ class ObjectStateHistory extends EventEmitter {
     return this.at()
   }
 
+  get length () {
+    return Object.keys(this.value).length
+  }
+
   valueOf () {
     return this.value
   }
@@ -79,9 +83,6 @@ class ObjectStateHistory extends EventEmitter {
   #dat (index = -1) {
     const idx = index
     let value
-    if (idx >= this.#list.length) {
-      return value
-    }
     for (let i = 0; i <= idx; i++) {
       const item = this.#list[i]
       value = mergeItemToObject(value, item)
@@ -119,7 +120,12 @@ class ObjectStateHistory extends EventEmitter {
   }
 
   #setOptions (options) {
+    const defaultOptions = {
+      limit: 0,
+      skipDelta: 1
+    }
     if (options === undefined || options === null) {
+      this.#options = defaultOptions
       return
     }
 
@@ -152,8 +158,8 @@ class ObjectStateHistory extends EventEmitter {
       throw new Error(errors[0])
     }
 
-    this.#options.limit = +options.limit || 0
-    this.#options.skipDelta = this.#options.limit ? 0 : Number.isNaN(options.skipDelta) ? 1 : +options.skipDelta
+    this.#options.limit = +options.limit || defaultOptions.limit
+    this.#options.skipDelta = this.#options.limit ? 0 : Number.isInteger(options.skipDelta) ? +options.skipDelta : defaultOptions.skipDelta
   }
 
   #addItem (data, operation = OPERATIONS.merge) {

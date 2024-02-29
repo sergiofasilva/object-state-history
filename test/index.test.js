@@ -164,11 +164,11 @@ describe('ObjectStateHistory options.', function () {
     assert.ok(new ObjectStateHistory({ a: '1', b: '2' }, null, {}))
   })
 
-  it('Should return an empty object when the options are not provided.', () => {
+  it('Should return an limit=0 and skipDelta=1 object when the options are not provided.', () => {
     const objHistoryData = { a: '1', b: '2' }
     const objHist = new ObjectStateHistory(objHistoryData)
     const info = objHist.info()
-    deepStrictEqual(info.options, {})
+    deepStrictEqual(info.options, { limit: 0, skipDelta: 1 })
   })
 })
 
@@ -213,6 +213,39 @@ describe('ObjectStateHistory limit option.', function () {
     const objHist = new ObjectStateHistory(objHistoryData, null, { limit })
     const info = objHist.info()
     strictEqual(info.options.limit, limit)
+  })
+
+  it('Should have a skipDelta = 0 when limit is greater than 0.', () => {
+    const objHistoryData = { a: '1', b: '2' }
+    const limit = 3
+    const skipDelta = 5
+    const objHist = new ObjectStateHistory(objHistoryData, null, { limit, skipDelta })
+    const info = objHist.info()
+    strictEqual(info.options.skipDelta, 0)
+  })
+
+  it('Should have a skipDelta option equal to the options skipDelta property, if limit = 0.', () => {
+    const objHistoryData = { a: '1', b: '2' }
+    const limit = 0
+    const skipDelta = 5
+    const objHist = new ObjectStateHistory(objHistoryData, null, { limit, skipDelta })
+    const info = objHist.info()
+    strictEqual(info.options.skipDelta, skipDelta)
+  })
+
+  it('Should have a skipDelta option equal to the options skipDelta property, if limit is not assigned.', () => {
+    const objHistoryData = { a: '1', b: '2' }
+    const skipDelta = 5
+    const objHist = new ObjectStateHistory(objHistoryData, null, { skipDelta })
+    const info = objHist.info()
+    strictEqual(info.options.skipDelta, skipDelta)
+  })
+
+  it('Should have a skipDelta option equal to one (1) when the options provided not include the limit and skipDelta properties.', () => {
+    const objHistoryData = { a: '1', b: '2' }
+    const objHist = new ObjectStateHistory(objHistoryData, null, { otherOption: 2 })
+    const info = objHist.info()
+    strictEqual(info.options.skipDelta, 1)
   })
 })
 
@@ -660,6 +693,19 @@ describe('ObjectStateHistory with history.', function () {
     deepStrictEqual(objInitial.value, { a: '1', b: '2', c: '3' })
     deepStrictEqual(objWithHist.value, { a: '1', b: '2', c: '3', d: '4', e: '5' })
     deepStrictEqual(objWithHist.list().length, 4)
+  })
+})
+
+describe('ObjectStateHistory properties.', function () {
+  it('Should return the number of value keys when call the length property.', () => {
+    const objHist = new ObjectStateHistory({ a: '1', b: '2' })
+    deepStrictEqual(objHist.length, 2)
+    objHist.c = '3'
+    deepStrictEqual(objHist.length, 3)
+    objHist.d = '4'
+    deepStrictEqual(objHist.length, 4)
+    delete objHist.d
+    deepStrictEqual(objHist.length, 3)
   })
 })
 
