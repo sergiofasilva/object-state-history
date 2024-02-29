@@ -9,6 +9,4 @@ function isNaturalNumber (value) {
   return isNatural
 }
 
-export {
-  isNaturalNumber
-}
+module.exports = { isNaturalNumber }

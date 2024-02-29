@@ -442,7 +442,9 @@ describe('ObjectStateHistory list method', function () {
     }
     const list = objHist.list()
     strictEqual(list.length, limit)
-    deepStrictEqual(objHist.value, { ...originalObjectData, c: nrChanges })
+    console.log('LIST:', objHist.list())
+    console.log('VALUE:', objHist.value)
+
     deepStrictEqual(objHist.value, { ...originalObjectData, c: nrChanges })
   })
 
@@ -559,7 +561,7 @@ describe('ObjectStateHistory at method.', function () {
 
   it('Should return the object value corresponding to argument index.', () => {
     const originalObjectData = { a: '1', b: '2' }
-    const objHist = new ObjectStateHistory(originalObjectData)
+    const objHist = new ObjectStateHistory(originalObjectData, null, { skipDelta: 0 })
     objHist.c = '3'
     objHist.d = '4'
 
@@ -573,7 +575,7 @@ describe('ObjectStateHistory at method.', function () {
     deepStrictEqual(valueTwo, { a: '1', b: '2', c: '3', d: '4' })
 
     const valueMinusTwo = objHist.at(-2)
-    deepStrictEqual(valueMinusTwo, objHist.list().at(-2).value)
+    deepStrictEqual(valueMinusTwo, objHist.list().at(-2).value) // only when skipDelta = 0, otherwise should be null
 
     const valueMinusOne = objHist.at(-1)
     const valueNoarguments = objHist.at()
