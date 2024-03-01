@@ -247,6 +247,40 @@ describe('ObjectStateHistory limit option.', function () {
     const info = objHist.info()
     strictEqual(info.options.skipDelta, 1)
   })
+
+  it('Should all value properties from list have a valid value if skipDelta = 0.', () => {
+    const objHistoryData = { a: '1', b: '2' }
+    const objHist = new ObjectStateHistory(objHistoryData, null, { limit: 0, skipDelta: 0 })
+    objHist.c = '3'
+    objHist.d = '4'
+    objHist.e = '5'
+
+    const info = objHist.info()
+    strictEqual(info.options.skipDelta, 0)
+
+    strictEqual(objHist.list().length, 4)
+    deepStrictEqual(info.list[0].value, { a: '1', b: '2' })
+    deepStrictEqual(info.list[1].value, { a: '1', b: '2', c: '3' })
+    deepStrictEqual(info.list[2].value, { a: '1', b: '2', c: '3', d: '4' })
+    deepStrictEqual(info.list[3].value, { a: '1', b: '2', c: '3', d: '4', e: '5' })
+  })
+
+  it('Should only the n skipDelta value properties from list have a valid value if skipDelta > 0.', () => {
+    const objHistoryData = { a: '1', b: '2' }
+    const objHist = new ObjectStateHistory(objHistoryData, null, { limit: 0, skipDelta: 2 })
+    objHist.c = '3'
+    objHist.d = '4'
+    objHist.e = '5'
+
+    const info = objHist.info()
+    strictEqual(info.options.skipDelta, 2)
+
+    strictEqual(objHist.list().length, 4)
+    strictEqual(info.list[0].value, null)
+    strictEqual(info.list[1].value, null)
+    deepStrictEqual(info.list[2].value, { a: '1', b: '2', c: '3', d: '4' })
+    deepStrictEqual(info.list[3].value, { a: '1', b: '2', c: '3', d: '4', e: '5' })
+  })
 })
 
 describe('ObjectStateHistory merge method', function () {
