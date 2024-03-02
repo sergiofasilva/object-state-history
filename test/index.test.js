@@ -283,6 +283,8 @@ describe('ObjectStateHistory limit option.', function () {
     strictEqual(info.list[1].value, null)
     deepStrictEqual(info.list[2].value, { a: '1', b: '2', c: '3', d: '4' })
     deepStrictEqual(info.list[3].value, { a: '1', b: '2', c: '3', d: '4', e: '5' })
+    deepStrictEqual(objHist.at(2), { a: '1', b: '2', c: '3', d: '4' })
+    deepStrictEqual(objHist.at(3), { a: '1', b: '2', c: '3', d: '4', e: '5' })
   })
 
   it('Should only the n skipDelta value properties from list have a valid value if skipDelta > 0 (test skipDelta greater than default).', () => {
@@ -304,6 +306,14 @@ describe('ObjectStateHistory limit option.', function () {
     for (let i = size - skipDeltaTest + 1; i < size + 1; i++) {
       strictEqual(Object.keys(info.list[i].value).length > 0, true)
     }
+    deepStrictEqual(info.list[size].value, { a: '1', b: '2', c: size - 1 })
+    // last value with null (use delta to find the value)
+    deepStrictEqual(info.list[size - skipDeltaTest].value, null)
+    // first value with valid value, not use delta to find the value
+    deepStrictEqual(info.list[size - skipDeltaTest + 1].value, { a: '1', b: '2', c: size - skipDeltaTest })
+    deepStrictEqual(objHist.at(size - skipDeltaTest), { a: '1', b: '2', c: size - skipDeltaTest - 1 })
+    deepStrictEqual(objHist.at(size - skipDeltaTest + 1), { a: '1', b: '2', c: size - skipDeltaTest })
+    deepStrictEqual(objHist.value, { a: '1', b: '2', c: size - 1 })
   })
 })
 
