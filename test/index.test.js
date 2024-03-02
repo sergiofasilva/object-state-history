@@ -4,6 +4,8 @@ import { describe, it } from 'node:test'
 import assert, { deepStrictEqual, strictEqual } from 'node:assert/strict'
 import { inspect } from 'node:util'
 
+const DEFAULT_SKIP_DELTA = 5
+
 describe('ObjectStateHistory constructor.', function () {
   it('Should return an error when no object, not undefined or not null is passed to it.', () => {
     assert.throws(() => {
@@ -164,11 +166,11 @@ describe('ObjectStateHistory options.', function () {
     assert.ok(new ObjectStateHistory({ a: '1', b: '2' }, null, {}))
   })
 
-  it('Should return an limit=0 and skipDelta=1 object when the options are not provided.', () => {
+  it(`Should return an limit=0 and skipDelta=${DEFAULT_SKIP_DELTA} object when the options are not provided.`, () => {
     const objHistoryData = { a: '1', b: '2' }
     const objHist = new ObjectStateHistory(objHistoryData)
     const info = objHist.info()
-    deepStrictEqual(info.options, { limit: 0, skipDelta: 1 })
+    deepStrictEqual(info.options, { limit: 0, skipDelta: DEFAULT_SKIP_DELTA })
   })
 })
 
@@ -218,7 +220,7 @@ describe('ObjectStateHistory limit option.', function () {
   it('Should have a skipDelta = 0 when limit is greater than 0.', () => {
     const objHistoryData = { a: '1', b: '2' }
     const limit = 3
-    const skipDelta = 5
+    const skipDelta = 3
     const objHist = new ObjectStateHistory(objHistoryData, null, { limit, skipDelta })
     const info = objHist.info()
     strictEqual(info.options.skipDelta, 0)
@@ -227,7 +229,7 @@ describe('ObjectStateHistory limit option.', function () {
   it('Should have a skipDelta option equal to the options skipDelta property, if limit = 0.', () => {
     const objHistoryData = { a: '1', b: '2' }
     const limit = 0
-    const skipDelta = 5
+    const skipDelta = 3
     const objHist = new ObjectStateHistory(objHistoryData, null, { limit, skipDelta })
     const info = objHist.info()
     strictEqual(info.options.skipDelta, skipDelta)
@@ -235,37 +237,38 @@ describe('ObjectStateHistory limit option.', function () {
 
   it('Should have a skipDelta option equal to the options skipDelta property, if limit is not assigned.', () => {
     const objHistoryData = { a: '1', b: '2' }
-    const skipDelta = 5
+    const skipDelta = 3
     const objHist = new ObjectStateHistory(objHistoryData, null, { skipDelta })
     const info = objHist.info()
     strictEqual(info.options.skipDelta, skipDelta)
   })
 
-  it('Should have a skipDelta option equal to one (1) when the options provided not include the limit and skipDelta properties.', () => {
+  it(`Should have a skipDelta option equal to the default shipDelta (${DEFAULT_SKIP_DELTA}) when the options provided not include the limit and skipDelta properties.`, () => {
     const objHistoryData = { a: '1', b: '2' }
     const objHist = new ObjectStateHistory(objHistoryData, null, { otherOption: 2 })
     const info = objHist.info()
-    strictEqual(info.options.skipDelta, 1)
+    strictEqual(info.options.skipDelta, DEFAULT_SKIP_DELTA)
   })
 
   it('Should all value properties from list have a valid value if skipDelta = 0.', () => {
     const objHistoryData = { a: '1', b: '2' }
     const objHist = new ObjectStateHistory(objHistoryData, null, { limit: 0, skipDelta: 0 })
-    objHist.c = '3'
-    objHist.d = '4'
-    objHist.e = '5'
+    const size = DEFAULT_SKIP_DELTA + 3
+    for (let i = 0; i < size; i++) {
+      objHist.c = i
+    }
 
     const info = objHist.info()
     strictEqual(info.options.skipDelta, 0)
 
-    strictEqual(objHist.list().length, 4)
+    strictEqual(objHist.list().length, size + 1)
     deepStrictEqual(info.list[0].value, { a: '1', b: '2' })
-    deepStrictEqual(info.list[1].value, { a: '1', b: '2', c: '3' })
-    deepStrictEqual(info.list[2].value, { a: '1', b: '2', c: '3', d: '4' })
-    deepStrictEqual(info.list[3].value, { a: '1', b: '2', c: '3', d: '4', e: '5' })
+    for (let i = 0; i < size; i++) {
+      deepStrictEqual(info.list[i + 1].value, { a: '1', b: '2', c: i })
+    }
   })
 
-  it('Should only the n skipDelta value properties from list have a valid value if skipDelta > 0.', () => {
+  it('Should only the n skipDelta value properties from list have a valid value if skipDelta > 0 (test skipDelta smaller than default).', () => {
     const objHistoryData = { a: '1', b: '2' }
     const objHist = new ObjectStateHistory(objHistoryData, null, { limit: 0, skipDelta: 2 })
     objHist.c = '3'
@@ -280,6 +283,27 @@ describe('ObjectStateHistory limit option.', function () {
     strictEqual(info.list[1].value, null)
     deepStrictEqual(info.list[2].value, { a: '1', b: '2', c: '3', d: '4' })
     deepStrictEqual(info.list[3].value, { a: '1', b: '2', c: '3', d: '4', e: '5' })
+  })
+
+  it('Should only the n skipDelta value properties from list have a valid value if skipDelta > 0 (test skipDelta greater than default).', () => {
+    const objHistoryData = { a: '1', b: '2' }
+    const skipDeltaTest = 8
+    const size = skipDeltaTest + 3
+    const objHist = new ObjectStateHistory(objHistoryData, null, { limit: 0, skipDelta: skipDeltaTest })
+    for (let i = 0; i < size; i++) {
+      objHist.c = i
+    }
+
+    const info = objHist.info()
+    strictEqual(info.options.skipDelta, skipDeltaTest)
+
+    strictEqual(objHist.list().length, size + 1)
+    for (let i = 0; i < size - skipDeltaTest + 1; i++) {
+      strictEqual(info.list[i].value, null)
+    }
+    for (let i = size - skipDeltaTest + 1; i < size + 1; i++) {
+      strictEqual(Object.keys(info.list[i].value).length > 0, true)
+    }
   })
 })
 

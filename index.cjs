@@ -122,7 +122,7 @@ class ObjectStateHistory extends EventEmitter {
   #setOptions (options) {
     const defaultOptions = {
       limit: 0,
-      skipDelta: 1
+      skipDelta: 5
     }
     if (options === undefined || options === null) {
       this.#options = defaultOptions
