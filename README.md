@@ -144,7 +144,7 @@ The inicial object data.
 
 The `history` parameter is an optional parameter in the `ObjectStateHistory` class that allows you to initialize an object with a list containing the history of previous changes. See <a href="#using-history">Using history</a> chapter.
 
-- The `history` parameter shou`d be an array of history items.
+- The `history` parameter should be an array of history items.
 - If the `history` parameter is not set, the object will be initialized without any previous history.
 
 ##### options
