@@ -73,7 +73,7 @@ class ObjectStateHistory extends EventEmitter {
   at (index = -1) {
     const idx = index < 0 ? this.#list.length + index : index
     const itemAtIndex = this.#list[idx]
-    const isItemWithAssignedValue = idx > this.#list.length - this.#options.skipDelta - 1
+    const isItemWithAssignedValue = idx > this.#list.length - this.#options.lastStatesToKeep - 1
     if (isItemWithAssignedValue) {
       return ObjectStateHistory.#getFreezedClonedObject(itemAtIndex?.value)
     }
@@ -122,7 +122,7 @@ class ObjectStateHistory extends EventEmitter {
   #setOptions (options) {
     const defaultOptions = {
       limit: 0,
-      skipDelta: 5
+      lastStatesToKeep: 5
     }
     if (options === undefined || options === null) {
       this.#options = defaultOptions
@@ -135,7 +135,7 @@ class ObjectStateHistory extends EventEmitter {
 
     const schemaOptions = {
       limit: value => isNaturalNumber(value),
-      skipDelta: value => isNaturalNumber(value)
+      lastStatesToKeep: value => isNaturalNumber(value)
     }
     // schemaOptions.limit.required = false
 
@@ -159,7 +159,7 @@ class ObjectStateHistory extends EventEmitter {
     }
 
     this.#options.limit = +options.limit || defaultOptions.limit
-    this.#options.skipDelta = this.#options.limit ? 0 : Number.isInteger(options.skipDelta) ? +options.skipDelta : defaultOptions.skipDelta
+    this.#options.lastStatesToKeep = this.#options.limit ? 0 : Number.isInteger(options.lastStatesToKeep) ? +options.lastStatesToKeep : defaultOptions.lastStatesToKeep
   }
 
   #addItem (data, operation = OPERATIONS.merge) {
@@ -167,10 +167,10 @@ class ObjectStateHistory extends EventEmitter {
     const lastValue = this.#list[this.#list.length - 1]?.value || {}
     const lastItem = mergeItemToObject(lastValue, newItem)
 
-    const isToClearValueFromskipDeltaItems = this.#list.length >= this.#options.skipDelta && this.#options.skipDelta > 0
-    if (isToClearValueFromskipDeltaItems) {
-      // clear the value of the the skipDelta previous item
-      this.#list[this.#list.length - this.#options.skipDelta].value = null
+    const isToClearValueFromlastStatesToKeepItems = this.#list.length >= this.#options.lastStatesToKeep && this.#options.lastStatesToKeep > 0
+    if (isToClearValueFromlastStatesToKeepItems) {
+      // clear the value of the the lastStatesToKeep previous item
+      this.#list[this.#list.length - this.#options.lastStatesToKeep].value = null
     }
     newItem.value = lastItem
     this.#list.push(newItem)

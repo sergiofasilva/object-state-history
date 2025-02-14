@@ -142,7 +142,10 @@ The inicial object data.
 
 ##### history
 
-The history of changes of the object. See <a href="#using-history">Using history</a> chapter.
+The `history` parameter is an optional parameter in the `ObjectStateHistory` class that allows you to initialize an object with a list containing the history of previous changes. See <a href="#using-history">Using history</a> chapter.
+
+- The `history` parameter shou`d be an array of history items.
+- If the `history` parameter is not set, the object will be initialized without any previous history.
 
 ##### options
 
@@ -216,10 +219,10 @@ objHist.c = '3' // trigger change event
 
 # Using history
 
-If you need to share the object across more than one node instance, you can use the **history** parameter to create an object with a list containing the history of previous changes.
+When the `history` parameter is provided, the system will use the provided history to reconstruct the object's state. This is useful in scenarios where you need to share the object across multiple instances or restore the object's state from a previously saved history.
 
 You can save the change history whenever changes are detected in the change event. See <a href="#events">Events</a> chapter.
-
+`
 Example of using history:
 
 ```javascript
@@ -254,7 +257,13 @@ In the constructor you can send as a third parameter an object with the **option
 
 ### Limit
 
-If you use very **large objects** and/or make **many changes** to objects, this can result in the ObjectStateHistory taking up a **lot of memory**. If this is a problem for you or if you don't need to have a very large history, it is possible to limit the number of changes stored in the list history.
+The `limit` option is a configuration setting in the `ObjectStateHistory` class that controls the maximum number of changes stored in the object's state history.
+
+When the `limit` option is set, the system will restrict the number of changes stored in the history to the specified limit. This is useful in scenarios where memory usage is a concern, and you do not need to keep an extensive history of changes.
+
+- The `limit` option should be a natural number (non-negative integer).
+- If the `limit` option is not set, the default value is 0, meaning there is no limit.
+- Setting `limit` to 0 will disable the feature, and the state history will not be limited.
 
 ```javascript
 const options = {
@@ -265,7 +274,58 @@ const obj = { a: 1, b: 2 }
 const objHistory = new ObjectStateHistory(obj, null, options)
 ```
 
-The **limit** option accepts non-negative integer values (natural numbers). Where the value zero (0) means that it has no limits (default behavior).
+&nbsp;
+
+### lastStatesToKeep
+
+The `lastStatesToKeep` option is a configuration setting in the `ObjectStateHistory` class that controls how the system handles incremental changes in the object's state history.
+
+When the `lastStatesToKeep` option is set, the system will periodically clear the value of the state history items to save memory. This is useful in scenarios where the full history of changes is not needed, and only the most recent state is important.
+
+- The `lastStatesToKeep` option should be a natural number (non-negative integer).
+- If the `lastStatesToKeep` option is not set, the default value is 5.
+- Setting `lastStatesToKeep` to 0 will disable the feature, and the state value will not be cleared.
+
+```javascript
+const options = {
+  lastStatesToKeep: 2
+}
+const objHist = new ObjectStateHistory({ a: 1 }, null, options)
+
+objHist.b = 2
+objHist.c = 3
+objHist.d = 4
+console.log('objHist.list())
+
+/*
+[
+  {
+    timestamp: 1739552210305,
+    operation: 'merge',
+    data: { a: 1 },
+    value: null
+  },
+  {
+    timestamp: 1739552210305,
+    operation: 'merge',
+    data: { b: 2 },
+    value: null
+  },
+  {
+    timestamp: 1739552210305,
+    operation: 'merge',
+    data: { c: 3 },
+    value: { a: 1, b: 2, c: 3 }
+  },
+  {
+    timestamp: 1739552210305,
+    operation: 'merge',
+    data: { d: 4 },
+    value: { a: 1, b: 2, c: 3, d: 4 }
+  }
+]
+  */
+```
 
 &nbsp;
 
