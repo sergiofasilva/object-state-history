@@ -1,5 +1,6 @@
 'use strict'
-import ObjectStateHistory from '../index.js'
+// import ObjectStateHistory from '../index.js'
+import ObjectStateHistory from '../dist/index.js'
 import { describe, it } from 'node:test'
 import assert, { deepStrictEqual, strictEqual } from 'node:assert/strict'
 import { inspect } from 'node:util'
@@ -543,8 +544,6 @@ describe('ObjectStateHistory list method', function () {
     }
     const list = objHist.list()
     strictEqual(list.length, limit)
-    console.log('LIST:', objHist.list())
-    console.log('VALUE:', objHist.value)
 
     deepStrictEqual(objHist.value, { ...originalObjectData, c: nrChanges })
   })

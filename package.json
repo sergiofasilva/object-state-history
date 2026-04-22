@@ -6,7 +6,7 @@
   "types": "./types/index.d.ts",
   "type": "module",
   "scripts": {
-    "test": "npx standard && node --test --experimental-test-coverage",
+    "test": "node --test --experimental-test-coverage",
     "push": "npm run build && npm version patch && git push --tags && npm publish",
     "push-minor": "npm run build && npm version minor && git push --tags && npm publish",
     "push-major": "npm run build && npm version major && git push --tags && npm publish",
@@ -16,8 +16,9 @@
     "node": ">=20.0.0"
   },
   "exports": {
-    "import": "./index.js",
-    "require": "./index.cjs"
+    "import": "./dist/index.js",
+    "require": "./cjs.cjs",
+    "default": "./dist/index.js"
   },
   "repository": {
     "type": "git",
@@ -35,6 +36,7 @@
     "list"
   ],
   "devDependencies": {
+    "@types/node": "^24.1.0",
     "object-state-history-main": "github:sergiofasilva/object-state-history#main",
     "standard": "*",
     "typescript": "^5.3.3"
